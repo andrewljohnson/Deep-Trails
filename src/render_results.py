@@ -9,8 +9,6 @@ def render_results_for_analysis(raster_data_paths,
                                 predictions, 
                                 band_list, 
                                 tile_size):
-    with open(CACHE_PATH + 'raster_data_paths.json', 'r') as infile:
-        raster_data_paths = json.load(infile)
     way_bitmap_npy = {}
     for raster_data_path in raster_data_paths:
         way_bitmap_npy[raster_data_path] = numpy.asarray(way_bitmap_for_naip(None, raster_data_path, None, None, None))
@@ -120,7 +118,7 @@ def shade_labels(image, labels, predictions, tile_size):
       for x in range(start_x, start_x+tile_size):
         for y in range(start_y, start_y+tile_size):
           r, g, b = image.getpixel((x, y))
-          if predictions[label_index] == 1:
+          if predictions[label_index][0] < predictions[label_index][1]:
             # shade ON predictions blue
             image.putpixel((x, y), (r, g, 255))
           else:
