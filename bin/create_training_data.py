@@ -30,7 +30,7 @@ def create_parser():
                         type=float,
                         help="how much data to allocate for training. the remainder is left for "
                              "test")
-    parser.add_argument("--band-list",
+    parser.add_argument("--bands",
                         default=[0, 0, 0, 1],
                         nargs=4,
                         type=int,

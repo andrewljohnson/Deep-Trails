@@ -13,7 +13,7 @@ def create_parser():
                         default=64,
                         type=int,
                         help="tile the NAIP and training data into NxN tiles with this dimension")
-    parser.add_argument("--band-list",
+    parser.add_argument("--bands",
                         default=[0, 0, 0, 1],
                         nargs=4,
                         type=int,
