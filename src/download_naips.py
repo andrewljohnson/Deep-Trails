@@ -55,6 +55,21 @@ class NAIPDownloader:
             pass
         return new_dir
 
+    def download_naips(self, state_abbreviation, year):
+        '''
+            download all the naips for a given state
+        '''
+
+        self.url_base = '{}{}/{}/{}/{}/{}/'.format(self.bucket_url, state_abbreviation, year,
+                                           self.resolution, self.spectrum)
+
+        self.configure_s3cmd()
+        naip_filenames = self.list_naips_for_state()
+        if self.should_randomize:
+            shuffle(naip_filenames)
+        naip_local_paths = self.download_from_s3(naip_filenames)
+        return naip_local_paths
+
     def download_naips(self):
         '''
             download self.number_of_naips randomish NAIPs from aws-naip bucket
@@ -80,6 +95,26 @@ class NAIPDownloader:
         f = open(file_path, 'w')
         f.write(newdata)
         f.close()
+
+    def list_naips_for_state(self):
+        '''
+            make a list of NAIPs based on the init parameters for the class
+        '''
+
+        # list the contents of the bucket directory
+        bash_command = "s3cmd ls --recursive --skip-existing {} --requester-pays".format(
+            self.url_base)
+        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        naip_filenames = []
+        for line in output.split('\n'):
+            parts = line.split(self.url_base)
+            if len(parts) == 2:
+                naip_filenames.append(parts[1])
+            else:
+                pass
+                # skip non filename lines from response
+        return naip_filenames
 
     def list_naips(self):
         '''
