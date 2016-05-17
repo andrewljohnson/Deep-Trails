@@ -4,7 +4,7 @@ import argparse
 
 from src.analysis import analyze
 from src.training_data import load_data_from_disk
-from src.render_results import render_results_for_analysis
+from src.training_visualization import render_results_for_analysis
 
 
 def create_parser():

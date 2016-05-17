@@ -16,7 +16,7 @@ NAIP_DATA_DIR = os.path.join(GEO_DATA_DIR, "naip")
 
 
 class NAIPDownloader:
-    def __init__(self, number_of_naips, should_randomize, state, year, resolution, spectrum, grid):
+    def __init__(self, number_of_naips, should_randomize, state, year, grid=None):
         '''
             download some arbitrary NAIP images from the aws-naip S3 bucket
         '''
@@ -26,8 +26,8 @@ class NAIPDownloader:
 
         self.state = state
         self.year = year
-        self.resolution = resolution
-        self.spectrum = spectrum
+        self.resolution = NAIP_RESOLUTION
+        self.spectrum = NAIP_SPECTRUM
         self.grid = grid
         self.bucket_url = 's3://aws-naip/'
         self.url_base = '{}{}/{}/{}/{}/{}/'.format(self.bucket_url, self.state, self.year,
@@ -55,7 +55,7 @@ class NAIPDownloader:
             pass
         return new_dir
 
-    def download_naips(self, state_abbreviation, year):
+    def download_naips_for_state_and_year(self):
         '''
             download all the naips for a given state
         '''

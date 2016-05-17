@@ -10,7 +10,7 @@ from osgeo import gdal
 from PIL import Image
 import numpy
 
-from download_labels import download_and_extract
+from openstreetmap_labels import download_and_extract
 from geo_util import latLonToPixel, pixelToLatLng
 
 # there is a 300 pixel buffer around NAIPs that should be trimmed off,

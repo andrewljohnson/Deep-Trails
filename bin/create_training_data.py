@@ -2,7 +2,7 @@
 
 import argparse
 
-from src.download_naips import NAIPDownloader
+from src.naip_images import NAIPDownloader
 from src.training_data import (random_training_data, equalize_data, split_train_test,
                                format_as_onehot_arrays, dump_data_to_disk)
 
@@ -37,11 +37,11 @@ def create_parser():
                         help="specify which bands to activate (R  G  B  IR)"
                              "--bands 0 0 0 1 (which activates only the IR band)")
     parser.add_argument("--naip-path",
-                        default=['md', '2013', '1m', 'rgbir', '38077'],
+                        default=['ri', '2013'],
                         nargs=5,
                         type=str,
-                        help="values to create the S3 bucket path for some NAIPs"
-                             "--naip-path md 2013 1m rgbir 38077 (defaults to some Maryland data)")
+                        help="specify the state and year for the NAIPs to analyze"
+                             "--naip-path md 2013 (defaults to some Maryland data)")
     parser.add_argument("--randomize-naips",
                         default=False,
                         action='store_false',
@@ -73,15 +73,10 @@ def create_parser():
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    NAIP_STATE, NAIP_YEAR, NAIP_RESOLUTION, NAIP_SPECTRUM, NAIP_GRID = args.naip_path
-
-    raster_data_paths = NAIPDownloader(args.number_of_naips,
-                                       args.randomize_naips,
-                                       NAIP_STATE,
-                                       NAIP_YEAR,
-                                       NAIP_RESOLUTION,
-                                       NAIP_SPECTRUM,
-                                       NAIP_GRID, ).download_naips()
+    NAIP_STATE, NAIP_YEAR = args.naip_path
+    naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, NAIP_STATE, NAIP_YEAR)
+    raster_data_paths = naiper.download_naips_for_state_and_year()
+    return
 
     road_labels, naip_tiles, waymap = random_training_data(
         raster_data_paths, args.extract_type, args.band_list, args.tile_size,
