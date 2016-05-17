@@ -2,7 +2,7 @@
 
 import argparse
 
-from src.run_analysis import analyze
+from src.analysis import analyze
 from src.training_data import load_data_from_disk
 from src.render_results import render_results_for_analysis
 
