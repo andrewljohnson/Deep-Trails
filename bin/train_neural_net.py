@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+'''
+    train a neural network using OpenStreetMap labels and NAIP images
+'''
+
 import argparse
 
 from src.analysis import analyze

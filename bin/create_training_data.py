@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+'''
+    create training data from OpenStreetMap labels and NAIP images
+'''
+
 import argparse
 
 from src.naip_images import NAIPDownloader
@@ -36,9 +40,16 @@ def create_parser():
                         type=int,
                         help="specify which bands to activate (R  G  B  IR)"
                              "--bands 0 0 0 1 (which activates only the IR band)")
+    parser.add_argument(
+        "--label-data-files",
+        default=[
+            'http://download.geofabrik.de/north-america/us/delware-latest.osm.pbf',
+        ],
+        type=str,
+        help="PBF files to extract road/feature label info from")
     parser.add_argument("--naip-path",
-                        default=['ri', '2013'],
-                        nargs=5,
+                        default=['de', '2013'],
+                        nargs=2,
                         type=str,
                         help="specify the state and year for the NAIPs to analyze"
                              "--naip-path md 2013 (defaults to some Maryland data)")
@@ -52,14 +63,6 @@ def create_parser():
                         type=int,
                         help="set this to a value between 1 and 14 or so, 10 segfaults on a "
                              "VirtualBox with 12GB, but runs on a Linux machine with 32GB")
-    parser.add_argument(
-        "--label-data-files",
-        default=[
-            'http://download.geofabrik.de/north-america/us/maryland-latest.osm.pbf',
-            'http://download.geofabrik.de/north-america/us/district-of-columbia-latest.osm.pbf'
-        ],
-        type=str,
-        help="PBF files to extract road/feature label info from")
     parser.add_argument("--extract-type",
                         default='highway',
                         choices=['highway', 'tennis', 'footway', 'cycleway'],

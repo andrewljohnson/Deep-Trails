@@ -26,12 +26,13 @@ class NAIPDownloader:
 
         self.state = state
         self.year = year
-        self.resolution = NAIP_RESOLUTION
-        self.spectrum = NAIP_SPECTRUM
+        self.resolution = '1m'
+        self.spectrum = 'rgbir'
         self.grid = grid
         self.bucket_url = 's3://aws-naip/'
-        self.url_base = '{}{}/{}/{}/{}/{}/'.format(self.bucket_url, self.state, self.year,
-                                                   self.resolution, self.spectrum, self.grid)
+
+        self.url_base = '{}{}/{}/{}/{}/'.format(self.bucket_url, self.state, self.year, 
+                                                self.resolution, self.spectrum)
 
         self.make_directory(NAIP_DATA_DIR, full_path=True)
 
@@ -59,9 +60,6 @@ class NAIPDownloader:
         '''
             download all the naips for a given state
         '''
-
-        self.url_base = '{}{}/{}/{}/{}/{}/'.format(self.bucket_url, state_abbreviation, year,
-                                           self.resolution, self.spectrum)
 
         self.configure_s3cmd()
         naip_filenames = self.list_naips_for_state()
@@ -109,7 +107,16 @@ class NAIPDownloader:
         naip_filenames = []
         for line in output.split('\n'):
             parts = line.split(self.url_base)
-            print parts
+            if len(parts) == 2:
+                naip_path = parts[1]
+                naip_filenames.append(naip_path)
+                naip_subpath = os.path.join(NAIP_DATA_DIR, naip_path.split('/')[0])
+                if not os.path.exists(naip_subpath):
+                    os.mkdir(naip_subpath)
+            else:
+                pass
+                # skip non filename lines from response
+
         return naip_filenames
 
     def list_naips(self):
