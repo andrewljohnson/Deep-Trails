@@ -109,11 +109,7 @@ class NAIPDownloader:
         naip_filenames = []
         for line in output.split('\n'):
             parts = line.split(self.url_base)
-            if len(parts) == 2:
-                naip_filenames.append(parts[1])
-            else:
-                pass
-                # skip non filename lines from response
+            print parts
         return naip_filenames
 
     def list_naips(self):
