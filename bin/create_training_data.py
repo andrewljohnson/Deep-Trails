@@ -43,7 +43,7 @@ def create_parser():
     parser.add_argument(
         "--label-data-files",
         default=[
-            'http://download.geofabrik.de/north-america/us/delware-latest.osm.pbf',
+            'http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf',
         ],
         type=str,
         help="PBF files to extract road/feature label info from")
@@ -79,10 +79,9 @@ def main():
     NAIP_STATE, NAIP_YEAR = args.naip_path
     naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, NAIP_STATE, NAIP_YEAR)
     raster_data_paths = naiper.download_naips()
-    return
 
     road_labels, naip_tiles, waymap = random_training_data(
-        raster_data_paths, args.extract_type, args.band_list, args.tile_size,
+        raster_data_paths, args.extract_type, args.bands, args.tile_size,
         args.pixels_to_fatten_roads, args.label_data_files, args.tile_overlap)
 
     equal_count_way_list, equal_count_tile_list = equalize_data(road_labels, naip_tiles,
