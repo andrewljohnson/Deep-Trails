@@ -56,21 +56,9 @@ class NAIPDownloader:
             pass
         return new_dir
 
-    def download_naips_for_state_and_year(self):
-        '''
-            download all the naips for a given state
-        '''
-
-        self.configure_s3cmd()
-        naip_filenames = self.list_naips_for_state()
-        if self.should_randomize:
-            shuffle(naip_filenames)
-        naip_local_paths = self.download_from_s3(naip_filenames)
-        return naip_local_paths
-
     def download_naips(self):
         '''
-            download self.number_of_naips randomish NAIPs from aws-naip bucket
+            download self.number_of_naips of the naips for a given state
         '''
 
         self.configure_s3cmd()
@@ -94,31 +82,6 @@ class NAIPDownloader:
         f.write(newdata)
         f.close()
 
-    def list_naips_for_state(self):
-        '''
-            make a list of NAIPs based on the init parameters for the class
-        '''
-
-        # list the contents of the bucket directory
-        bash_command = "s3cmd ls --recursive --skip-existing {} --requester-pays".format(
-            self.url_base)
-        process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE)
-        output = process.communicate()[0]
-        naip_filenames = []
-        for line in output.split('\n'):
-            parts = line.split(self.url_base)
-            if len(parts) == 2:
-                naip_path = parts[1]
-                naip_filenames.append(naip_path)
-                naip_subpath = os.path.join(NAIP_DATA_DIR, naip_path.split('/')[0])
-                if not os.path.exists(naip_subpath):
-                    os.mkdir(naip_subpath)
-            else:
-                pass
-                # skip non filename lines from response
-
-        return naip_filenames
-
     def list_naips(self):
         '''
             make a list of NAIPs based on the init parameters for the class
@@ -132,11 +95,17 @@ class NAIPDownloader:
         naip_filenames = []
         for line in output.split('\n'):
             parts = line.split(self.url_base)
+            # there may be subdirectories for each state, where directories need to be made
             if len(parts) == 2:
-                naip_filenames.append(parts[1])
+                naip_path = parts[1]
+                naip_filenames.append(naip_path)
+                naip_subpath = os.path.join(NAIP_DATA_DIR, naip_path.split('/')[0])
+                if not os.path.exists(naip_subpath):
+                    os.mkdir(naip_subpath)
             else:
                 pass
                 # skip non filename lines from response
+
         return naip_filenames
 
     def download_from_s3(self, naip_filenames):
