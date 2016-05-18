@@ -79,7 +79,6 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     NAIP_STATE, NAIP_YEAR = args.naip_path
-
     naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, NAIP_STATE, NAIP_YEAR)
     raster_data_paths = naiper.download_naips()
 
