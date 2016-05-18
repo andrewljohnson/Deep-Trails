@@ -91,7 +91,7 @@ def main():
         pickle.dump(raster_data_paths, outfile)
 
     create_tiled_training_data(raster_data_paths, args.extract_type, args.bands, args.tile_size,
-        args.pixels_to_fatten_roads, args.label_data_files, args.tile_overlap)
+        args.pixels_to_fatten_roads, args.label_data_files.split(' '), args.tile_overlap)
 
 if __name__ == "__main__":
     main()

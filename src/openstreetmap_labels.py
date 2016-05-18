@@ -109,6 +109,7 @@ class WayExtracter(o.SimpleHandler):
 
 def download_and_extract(file_urls_to_download, extract_type='highway'):
     file_urls = file_urls_to_download
+    print file_urls
     file_paths = download_files(file_urls)
     w = WayMap(extract_type=extract_type)
     w.extract_files(file_paths)
