@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import numpy
 import os
-import pickle
 import random
 import sys
 import time
@@ -218,14 +217,14 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         # dump the tiled labels from the way bitmap to disk
         path_parts = raster_data_path.split('/')
         filename = path_parts[len(path_parts)-1]
-        labels_path = CACHE_PATH + filename + '-labels.pickle'
+        labels_path = CACHE_PATH + filename + '-labels.npy'
         with open(labels_path, 'w') as outfile:
-          pickle.dump(road_labels, outfile)
+          numpy.dump(road_labels, outfile)
 
         # dump the tiled i,ages from the NAIP to disk
-        images_path = CACHE_PATH + filename + '-images.pickle'
+        images_path = CACHE_PATH + filename + '-images.npy'
         with open(images_path, 'w') as outfile:
-          pickle.dump(naip_tiles, outfile)
+          numpy.dump(naip_tiles, outfile)
 
 
 def shuffle_in_unison(a, b):
@@ -363,13 +362,13 @@ def load_training_tiles(naip_path):
     t0 = time.time()
     path_parts = naip_path.split('/')
     filename = path_parts[len(path_parts)-1]
-    labels_path = CACHE_PATH + filename + '-labels.pickle'
-    images_path = CACHE_PATH + filename + '-images.pickle'
+    labels_path = CACHE_PATH + filename + '-labels.npy'
+    images_path = CACHE_PATH + filename + '-images.npy'
     with open(labels_path, 'r') as infile:
-        training_labels = pickle.load(infile)
+        training_labels = numpy.load(infile)
     with open(images_path, 'r') as infile:
-        training_images = pickle.load(infile)
-    print("DATA LOADED: time to unpickle/json test data {0:.1f}s".format(time.time() - t0))
+        training_images = numpy.load(infile)
+    print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_labels, training_images
 
 
