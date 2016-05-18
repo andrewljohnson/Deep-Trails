@@ -5,9 +5,10 @@
 '''
 
 import argparse
+import pickle
 
-from src.analysis import analyze
-from src.training_data import load_data_from_disk
+from src.single_layer_network import analyze
+from src.training_data import CACHE_PATH, load_training_tiles, equalize_data, split_train_test, format_as_onehot_arrays
 from src.training_visualization import render_results_for_analysis
 
 
@@ -41,15 +42,34 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    raster_data_paths, training_images, training_labels, test_images, test_labels, label_types, \
-        onehot_training_labels, onehot_test_labels = load_data_from_disk()
+    with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
+        raster_data_paths = pickle.load(infile)
+
+    test_labels = []
+    test_images = []
+    model = None
+
+    for path in raster_data_paths:
+        labels, images = load_training_tiles(path)
+        equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
+        new_test_labels, training_labels, new_test_images, training_images = split_train_test(equal_count_tile_list, equal_count_way_list, .9)
+        [test_labels.append(l) for l in new_test_labels]
+        [test_images.append(i) for i in new_test_images]
+
+        onehot_training_labels = format_as_onehot_arrays(training_labels)
+        onehot_test_labels = format_as_onehot_arrays(test_labels)
+
+        model = analyze(onehot_training_labels, onehot_test_labels, test_labels, training_labels, test_images,
+            training_images, args.neural_net, args.bands, args.tile_size, args.number_of_epochs, model)
+
+    '''
     predictions = analyze(onehot_training_labels, onehot_test_labels, test_labels, training_labels,
                           test_images, training_images, label_types, args.neural_net,
                           args.bands, args.tile_size, args.number_of_epochs)
     if args.render_results:
         render_results_for_analysis(raster_data_paths, training_labels, test_labels, predictions,
                                     args.band_list, args.tile_size)
-
+    '''
 
 if __name__ == "__main__":
     main()

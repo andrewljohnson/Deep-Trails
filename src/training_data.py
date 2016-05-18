@@ -184,20 +184,28 @@ def bounds_contains_point(bounds, point_tuple):
 def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_size,
                                pixels_to_fatten_roads, label_data_files, tile_overlap):
     """Return lists of training images and matching labels."""
-    road_labels = []
-    naip_tiles = []
 
     # tile images and labels
     waymap = download_and_extract(label_data_files, extract_type)
 
     for raster_data_path in raster_data_paths:
+
+        path_parts = raster_data_path.split('/')
+        filename = path_parts[len(path_parts)-1]
+        labels_path = CACHE_PATH + filename + '-labels.npy'
+        images_path = CACHE_PATH + filename + '-images.npy'
+        if os.path.exists(labels_path) and os.path.exists(images_path):
+            print("TRAINING DATA for {} already tiled".format(filename))
+            continue
+
+        road_labels = []
+        naip_tiles = []
         raster_dataset, bands_data = read_naip(raster_data_path, band_list)
         rows = bands_data.shape[0]
         cols = bands_data.shape[1]
 
-        way_bitmap_npy = numpy.asarray(
-            way_bitmap_for_naip(waymap.extracter.ways, raster_data_path, raster_dataset, rows,
-                                cols, pixels_to_fatten_roads))
+        way_bitmap_npy = way_bitmap_for_naip(waymap.extracter.ways, raster_data_path, raster_dataset, rows,
+                                cols, pixels_to_fatten_roads)
 
         left_x, right_x = NAIP_PIXEL_BUFFER, cols - NAIP_PIXEL_BUFFER
         top_y, bottom_y = NAIP_PIXEL_BUFFER, rows - NAIP_PIXEL_BUFFER
@@ -207,24 +215,22 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
             for row in range(top_y, bottom_y, tile_size / tile_overlap):
                 if row + tile_size < bottom_y and col + tile_size < right_x:
                     new_tile = way_bitmap_npy[row:row + tile_size, col:col + tile_size]
-                    road_labels.append((new_tile, (col, row), raster_data_path))
+                    road_labels.append((new_tile, col, row, raster_data_path))
 
         # tile the NAIP
         for tile in tile_naip(raster_data_path, raster_dataset, bands_data, band_list, tile_size,
                               tile_overlap):
             naip_tiles.append(tile)
 
+        assert len(naip_tiles) == len(road_labels)
+
         # dump the tiled labels from the way bitmap to disk
-        path_parts = raster_data_path.split('/')
-        filename = path_parts[len(path_parts)-1]
-        labels_path = CACHE_PATH + filename + '-labels.npy'
         with open(labels_path, 'w') as outfile:
-          numpy.dump(road_labels, outfile)
+          numpy.save(outfile, numpy.asarray(road_labels))
 
         # dump the tiled i,ages from the NAIP to disk
-        images_path = CACHE_PATH + filename + '-images.npy'
         with open(images_path, 'w') as outfile:
-          numpy.dump(naip_tiles, outfile)
+          numpy.save(outfile, numpy.asarray(naip_tiles))
 
 
 def shuffle_in_unison(a, b):

@@ -51,14 +51,14 @@ def analyze(onehot_training_labels, onehot_test_labels, test_labels, training_la
       net = tflearn.regression(softmax, optimizer=momentum, loss='categorical_crossentropy')
 
       model = tflearn.DNN(net, tensorboard_verbose=0)
-    else:
-      model.fit(train_images,
-                npy_training_labels,
-                n_epoch=number_of_epochs,
-                shuffle=False,
-                validation_set=(npy_test_images, npy_test_labels),
-                show_metric=True,
-                run_id='mlp')
+
+    model.fit(train_images,
+              npy_training_labels,
+              n_epoch=number_of_epochs,
+              shuffle=False,
+              validation_set=(npy_test_images, npy_test_labels),
+              show_metric=True,
+              run_id='mlp')
 
     return model
 
