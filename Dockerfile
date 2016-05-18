@@ -58,8 +58,5 @@ COPY s3config-default /root/.s3cfg
 # its different if we do AWS GPUs
 RUN apt-get install libhdf5-dev
 
-# needed this on my Mac for Tensorflow to work
-RUN easy_install --upgrade six
-
 ADD . /DeepOSM
 WORKDIR /DeepOSM
