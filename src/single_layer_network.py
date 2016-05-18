@@ -8,7 +8,7 @@ import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
 
-def analyze(onehot_training_labels, onehot_test_labels, test_labels, training_labels, test_images,
+def analyze(onehot_training_labels, onehot_test_labels, test_images,
             training_images, neural_net_type, band_list, tile_size, number_of_epochs, model):
     '''
       package data for tensorflow and analyze
