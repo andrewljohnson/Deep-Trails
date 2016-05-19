@@ -83,7 +83,7 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
 
         network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
         if neural_net_type == 'one_layer_relu':
-            network = tflearn.fully_connected(network, 2048, activation='relu')
+            network = tflearn.fully_connected(network, 512, activation='relu')
         elif neural_net_type == 'one_layer_relu_conv':
             network = conv_2d(network, 256, 16, activation='relu')
             network = max_pool_2d(network, 3)
