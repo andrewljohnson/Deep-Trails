@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy
 import os
+import pickle
 import random
 import sys
 import time
