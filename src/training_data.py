@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy
 import os
+import pickle
 import random
 import sys
 import time
@@ -12,10 +13,10 @@ from osgeo import gdal
 from PIL import Image
 
 from openstreetmap_labels import download_and_extract
-from geo_util import latLonToPixel, pixelToLatLng
+from geo_util import lat_lon_to_pixel, pixel_to_lat_lon
 
 
-# there is a 300 pixel buffer around NAIPs that should be trimmed off, where NAIPs overlap... 
+# there is a 300 pixel buffer around NAIPs to be trimmed off, where NAIPs overlap...
 # otherwise using overlapping images makes wonky train/test splits
 NAIP_PIXEL_BUFFER = 300
 
@@ -109,8 +110,8 @@ def way_bitmap_for_naip(
             if not bounds_contains_point(bounds, current_point) or \
                not bounds_contains_point(bounds, next_point):
                 continue
-            current_pix = latLonToPixel(raster_dataset, current_point)
-            next_pix = latLonToPixel(raster_dataset, next_point)
+            current_pix = lat_lon_to_pixel(raster_dataset, current_point)
+            next_pix = lat_lon_to_pixel(raster_dataset, next_point)
             add_pixels_between(current_pix, next_pix, cols, rows, way_bitmap,
                                pixels_to_fatten_roads)
     print(" {0:.1f}s".format(time.time() - t0))
@@ -127,8 +128,8 @@ def bounds_for_naip(raster_dataset, rows, cols):
     """Clip the NAIP to 0 to cols, 0 to rows."""
     left_x, right_x, top_y, bottom_y = \
         NAIP_PIXEL_BUFFER, cols - NAIP_PIXEL_BUFFER, NAIP_PIXEL_BUFFER, rows - NAIP_PIXEL_BUFFER
-    sw = pixelToLatLng(raster_dataset, left_x, bottom_y)
-    ne = pixelToLatLng(raster_dataset, right_x, top_y)
+    sw = pixel_to_lat_lon(raster_dataset, left_x, bottom_y)
+    ne = pixel_to_lat_lon(raster_dataset, right_x, top_y)
     return {'sw': sw, 'ne': ne}
 
 
@@ -184,14 +185,13 @@ def bounds_contains_point(bounds, point_tuple):
 def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_size,
                                pixels_to_fatten_roads, label_data_files, tile_overlap):
     """Return lists of training images and matching labels."""
-
     # tile images and labels
     waymap = download_and_extract(label_data_files, extract_type)
 
     for raster_data_path in raster_data_paths:
 
         path_parts = raster_data_path.split('/')
-        filename = path_parts[len(path_parts)-1]
+        filename = path_parts[len(path_parts) - 1]
         labels_path = CACHE_PATH + filename + '-labels.npy'
         images_path = CACHE_PATH + filename + '-images.npy'
         if os.path.exists(labels_path) and os.path.exists(images_path):
@@ -204,12 +204,12 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         rows = bands_data.shape[0]
         cols = bands_data.shape[1]
 
-        way_bitmap_npy = way_bitmap_for_naip(waymap.extracter.ways, raster_data_path, raster_dataset, rows,
-                                cols, pixels_to_fatten_roads)
+        way_bitmap_npy = way_bitmap_for_naip(waymap.extracter.ways, raster_data_path,
+                                             raster_dataset, rows, cols, pixels_to_fatten_roads)
 
         left_x, right_x = NAIP_PIXEL_BUFFER, cols - NAIP_PIXEL_BUFFER
         top_y, bottom_y = NAIP_PIXEL_BUFFER, rows - NAIP_PIXEL_BUFFER
-        
+
         # tile the way bitmap
         for col in range(left_x, right_x, tile_size / tile_overlap):
             for row in range(top_y, bottom_y, tile_size / tile_overlap):
@@ -226,11 +226,11 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
 
         # dump the tiled labels from the way bitmap to disk
         with open(labels_path, 'w') as outfile:
-          numpy.save(outfile, numpy.asarray(road_labels))
+            numpy.save(outfile, numpy.asarray(road_labels))
 
         # dump the tiled i,ages from the NAIP to disk
         with open(images_path, 'w') as outfile:
-          numpy.save(outfile, numpy.asarray(naip_tiles))
+            numpy.save(outfile, numpy.asarray(naip_tiles))
 
 
 def shuffle_in_unison(a, b):
@@ -367,7 +367,7 @@ def load_training_tiles(naip_path):
     print("LOADING DATA: reading from disk and unpickling")
     t0 = time.time()
     path_parts = naip_path.split('/')
-    filename = path_parts[len(path_parts)-1]
+    filename = path_parts[len(path_parts) - 1]
     labels_path = CACHE_PATH + filename + '-labels.npy'
     images_path = CACHE_PATH + filename + '-images.npy'
     with open(labels_path, 'r') as infile:
@@ -377,6 +377,15 @@ def load_training_tiles(naip_path):
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_labels, training_images
 
+
+def cache_paths(raster_data_paths):
+    """Cache a list of naip image paths, to pass on to the train_neural_net script."""
+    try:
+        os.mkdir(CACHE_PATH)
+    except:
+        pass
+    with open(CACHE_PATH + 'raster_data_paths.pickle', 'w') as outfile:
+        pickle.dump(raster_data_paths, outfile)
 
 
 if __name__ == "__main__":
