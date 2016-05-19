@@ -1,4 +1,4 @@
-""" A simple 1 layer network."""
+"""A simple 1 layer network."""
 from __future__ import division, print_function, absolute_import
 
 import numpy
@@ -6,8 +6,8 @@ import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
 
-def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images, neural_net_type, 
-                    band_list, tile_size, number_of_epochs, model):
+def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images,
+                    neural_net_type, band_list, tile_size, number_of_epochs, model):
     """Package data for tensorflow and analyze."""
     npy_training_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in training_images])
 
@@ -22,31 +22,31 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
     test_images = numpy.multiply(test_images, 1.0 / 255.0)
 
     if not model:
-      on_band_count = 0
-      for b in band_list:
-          if b == 1:
-              on_band_count += 1
+        on_band_count = 0
+        for b in band_list:
+            if b == 1:
+                on_band_count += 1
 
-      network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
-      if neural_net_type == 'one_layer_relu':
-          network = tflearn.fully_connected(network, 2048, activation='relu')
-      elif neural_net_type == 'one_layer_relu_conv':
-          network = conv_2d(network, 256, 16, activation='relu')
-          network = max_pool_2d(network, 3)
-      else:
-          print("ERROR: exiting, unknown layer type for neural net")
+        network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
+        if neural_net_type == 'one_layer_relu':
+            network = tflearn.fully_connected(network, 2048, activation='relu')
+        elif neural_net_type == 'one_layer_relu_conv':
+            network = conv_2d(network, 256, 16, activation='relu')
+            network = max_pool_2d(network, 3)
+        else:
+            print("ERROR: exiting, unknown layer type for neural net")
 
-      # classify as road or not road
-      softmax = tflearn.fully_connected(network, 2, activation='softmax')
+        # classify as road or not road
+        softmax = tflearn.fully_connected(network, 2, activation='softmax')
 
-      # based on parameters from www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf
-      momentum = tflearn.optimizers.Momentum(
-          learning_rate=.005, momentum=0.9,
-          lr_decay=0.0002, name='Momentum')
+        # based on parameters from www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf
+        momentum = tflearn.optimizers.Momentum(
+            learning_rate=.005, momentum=0.9,
+            lr_decay=0.0002, name='Momentum')
 
-      net = tflearn.regression(softmax, optimizer=momentum, loss='categorical_crossentropy')
+        net = tflearn.regression(softmax, optimizer=momentum, loss='categorical_crossentropy')
 
-      model = tflearn.DNN(net, tensorboard_verbose=0)
+        model = tflearn.DNN(net, tensorboard_verbose=0)
 
     model.fit(train_images,
               npy_training_labels,
@@ -58,8 +58,13 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
 
     return model
 
-  def predictions_for_tiles(test_images, model):
+
+def predictions_for_tiles(test_images, model):
     """Batch predictions on the test image set, to avoid a memory spike."""
+    npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
+    test_images = npy_test_images.astype(numpy.float32)
+    test_images = numpy.multiply(test_images, 1.0 / 255.0)
+
     all_predictions = []
     for x in range(0, len(test_images) - 100, 100):
         for p in model.predict(test_images[x:x + 100]):

@@ -93,7 +93,7 @@ def main():
 
     predictions = predictions_for_tiles(test_images, model)
     if args.render_results:
-        render_results_for_analysis(raster_data_paths, predictions, test_images, args.band_list,
+        render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
                                     args.tile_size)
 
 
