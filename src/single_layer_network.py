@@ -1,6 +1,4 @@
-'''
-    simple 1 layer network
-'''
+""" A simple 1 layer network."""
 from __future__ import division, print_function, absolute_import
 
 import numpy
@@ -10,9 +8,7 @@ from tflearn.layers.conv import conv_2d, max_pool_2d
 
 def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images, neural_net_type, 
                     band_list, tile_size, number_of_epochs, model):
-    '''
-      package data for tensorflow and analyze
-    '''
+    """Package data for tensorflow and analyze."""
     npy_training_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in training_images])
 
     npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])

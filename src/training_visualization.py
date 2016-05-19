@@ -1,3 +1,5 @@
+"""Visualize predictions from a neural net analyzing satellite imagery to extract features."""
+
 from __future__ import print_function
 import os
 import time
@@ -9,15 +11,17 @@ from src.training_data import way_bitmap_for_naip
 
 
 def render_results_for_analysis(raster_data_paths, predictions, test_images, band_list, tile_size):
-
+    """Generate a JPEG for each TIFF showing predictions shaded."""
     for raster_data_path in raster_data_paths:
         way_bitmap_npy = numpy.asarray(way_bitmap_for_naip(None, raster_data_path, None, None,
                                                            None))
-        render_predictions(raster_data_path, predictions, test_images, way_bitmap_npy, band_list, tile_size)
+        render_predictions(raster_data_path, predictions, test_images, way_bitmap_npy, band_list,
+                           tile_size)
 
 
-def render_predictions(raster_data_path, predictions, test_images, way_bitmap_npy, band_list, tile_size):
-    training_labels_by_naip = []
+def render_predictions(raster_data_path, predictions, test_images, way_bitmap_npy, band_list,
+                       tile_size):
+    """Generate a JPEG for the given raster_data_path, showing predictions shaded."""
     test_images_by_naip = []
     predictions_by_naip = []
 
@@ -94,9 +98,7 @@ def render_results_as_image(raster_data_path,
 
 
 def shade_labels(image, labels, predictions, tile_size):
-    '''
-        visualize predicted ON labels as blue, OFF as green
-    '''
+    """Visualize predicted ON labels as blue, OFF as green."""
     label_index = 0
     for label in labels:
         start_x = label[1][0]

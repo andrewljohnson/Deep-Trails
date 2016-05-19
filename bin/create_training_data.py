@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
-'''
-    create training data from OpenStreetMap labels and NAIP images
-'''
+"""Create training data from OpenStreetMap labels and NAIP images."""
 
 import argparse
 import os
 import pickle
 
 from src.naip_images import NAIPDownloader
-from src.training_data import (create_tiled_training_data, equalize_data, split_train_test,
-                               format_as_onehot_arrays, CACHE_PATH)
+from src.training_data import (create_tiled_training_data, CACHE_PATH)
 
 
 def create_parser():
+    """Create the argparse parser."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--tile-size",
                         default=64,
@@ -22,14 +20,14 @@ def create_parser():
     parser.add_argument("--tile-overlap",
                         default=1,
                         type=int,
-                        help="divide the tile-size by this number for how many pixels to move over "
+                        help="divide the tile-size by this arg for how many pixels to move over "
                              "when tiling data. this is set to 1 by default, so tiles don't "
                              "overlap. setting it to 2 would make tiles overlap by half, and "
                              "setting it to 3 would make the tiles overlap by 2/3rds")
     parser.add_argument("--pixels-to-fatten-roads",
                         default=3,
                         type=int,
-                        help="the number of pixels to fatten a road centerline (e.g. the default 3 "
+                        help="the number of px to fatten a road centerline (e.g. the default 3 "
                              "makes roads 7px wide)")
     parser.add_argument("--percent-for-training-data",
                         default=.90,
@@ -58,7 +56,7 @@ def create_parser():
     parser.add_argument("--randomize-naips",
                         default=False,
                         action='store_false',
-                        help="turn on this option if you don't want to get NAIPs in order from the "
+                        help="turn on this arg if you don't want to get NAIPs in order from the "
                              "bucket path")
     parser.add_argument("--number-of-naips",
                         default=5,
@@ -76,6 +74,7 @@ def create_parser():
 
 
 def main():
+    """Download NAIP images, PBF files, and serialize training data."""
     parser = create_parser()
     args = parser.parse_args()
     NAIP_STATE, NAIP_YEAR = args.naip_path
@@ -90,7 +89,9 @@ def main():
         pickle.dump(raster_data_paths, outfile)
 
     create_tiled_training_data(raster_data_paths, args.extract_type, args.bands, args.tile_size,
-        args.pixels_to_fatten_roads, args.label_data_files, args.tile_overlap)
+                               args.pixels_to_fatten_roads, args.label_data_files,
+                               args.tile_overlap)
+
 
 if __name__ == "__main__":
     main()
