@@ -15,7 +15,6 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
     Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
     Keep the train and test sets to a max of 10K images by throwing out random data sometimes.
     """
-
     training_images = []
     onehot_training_labels = []
     test_images = []
@@ -37,7 +36,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
         # read in another NAIP worth of data
         labels, images = load_training_tiles(path)
         if len(labels) == 0 or len(images) == 0:
-          continue
+            continue
         equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
         new_test_labels, training_labels, new_test_images, new_training_images = \
             split_train_test(equal_count_tile_list, equal_count_way_list, .9)
@@ -65,17 +64,17 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
 def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images,
                     neural_net_type, band_list, tile_size, number_of_epochs, model):
     """Package data for tensorflow and analyze."""
-    npy_training_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in training_images])
-
-    npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
     npy_training_labels = numpy.asarray(onehot_training_labels)
     npy_test_labels = numpy.asarray(onehot_test_labels)
 
     # normalize 0-255 values to 0-1
-    train_images = npy_training_images.astype(numpy.float32)
-    train_images = numpy.multiply(train_images, 1.0 / 255.0)
-    test_images = npy_test_images.astype(numpy.float32)
-    test_images = numpy.multiply(test_images, 1.0 / 255.0)
+    norm_training_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in training_images])
+    norm_train_images = norm_training_images.astype(numpy.float32)
+    norm_train_images = numpy.multiply(norm_train_images, 1.0 / 255.0)
+
+    norm_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
+    norm_test_images = norm_test_images.astype(numpy.float32)
+    norm_test_images = numpy.multiply(norm_test_images, 1.0 / 255.0)
 
     if not model:
         on_band_count = 0
@@ -104,11 +103,11 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
 
         model = tflearn.DNN(net, tensorboard_verbose=0)
 
-    model.fit(train_images,
+    model.fit(norm_train_images,
               npy_training_labels,
               n_epoch=number_of_epochs,
               shuffle=False,
-              validation_set=(npy_test_images, npy_test_labels),
+              validation_set=(norm_test_images, npy_test_labels),
               show_metric=True,
               run_id='mlp')
 
