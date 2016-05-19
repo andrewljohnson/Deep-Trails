@@ -7,7 +7,7 @@ import os
 import pickle
 
 from src.naip_images import NAIPDownloader
-from src.training_data import (create_tiled_training_data, CACHE_PATH)
+from src.training_data import create_tiled_training_data, cache_paths
 
 
 def create_parser():
@@ -75,19 +75,11 @@ def create_parser():
 
 def main():
     """Download NAIP images, PBF files, and serialize training data."""
-    parser = create_parser()
-    args = parser.parse_args()
+    args = create_parser().parse_args()
     NAIP_STATE, NAIP_YEAR = args.naip_path
     naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, NAIP_STATE, NAIP_YEAR)
     raster_data_paths = naiper.download_naips()
-
-    try:
-        os.mkdir(CACHE_PATH)
-    except:
-        pass
-    with open(CACHE_PATH + 'raster_data_paths.pickle', 'w') as outfile:
-        pickle.dump(raster_data_paths, outfile)
-
+    cache_paths(raster_data_paths)
     create_tiled_training_data(raster_data_paths, args.extract_type, args.bands, args.tile_size,
                                args.pixels_to_fatten_roads, args.label_data_files,
                                args.tile_overlap)

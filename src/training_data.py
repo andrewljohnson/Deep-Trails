@@ -377,6 +377,16 @@ def load_training_tiles(naip_path):
     return training_labels, training_images
 
 
+def cache_paths(raster_data_paths):
+    """Cache a list of naip image paths, to pass on to the train_neural_net script."""
+    try:
+        os.mkdir(CACHE_PATH)
+    except:
+        pass
+    with open(CACHE_PATH + 'raster_data_paths.pickle', 'w') as outfile:
+        pickle.dump(raster_data_paths, outfile)
+
+
 if __name__ == "__main__":
     print("Use bin/create_training_data.py instead of running this script.", file=sys.stderr)
     sys.exit(1)

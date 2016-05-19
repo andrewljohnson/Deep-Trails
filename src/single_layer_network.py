@@ -5,6 +5,60 @@ import numpy
 import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
+from src.training_data import load_training_tiles, equalize_data, split_train_test, \
+    format_as_onehot_arrays, shuffle_in_unison
+
+
+def train_on_cached_data(raster_data_paths):
+    """Load tiled/cached data, which was prepared for the NAIPs listed in raster_data_paths.
+
+       Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
+       Keep the train and test sets to a max of 10K images by throwing out random data sometimes.
+    """
+
+    training_images = []
+    onehot_training_labels = []
+    test_images = []
+    onehot_test_labels = []
+    model = None
+    epoch = 0
+
+    for path in raster_data_paths:
+        # keep test list to 1000 images
+        if len(test_images) > 10000:
+            test_images = test_images[:9000]
+            onehot_test_labels = onehot_test_labels[:9000]
+
+        # keep train list to 10000 images
+        if len(training_images) > 10000:
+            training_images = training_images[:9000]
+            onehot_training_labels = onehot_training_labels[:9000]
+
+        # read in another NAIP worth of data
+        labels, images = load_training_tiles(path)
+        equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
+        new_test_labels, training_labels, new_test_images, new_training_images = \
+            split_train_test(equal_count_tile_list, equal_count_way_list, .9)
+        if len(training_labels) == 0:
+            print("WARNING: a naip image didn't have any road labels?")
+            continue
+
+        # add it to the training and test lists
+        [training_images.append(i) for i in new_training_images]
+        [test_images.append(i) for i in new_test_images]
+        [onehot_training_labels.append(l) for l in format_as_onehot_arrays(training_labels)]
+        [onehot_test_labels.append(l) for l in format_as_onehot_arrays(new_test_labels)]
+
+        # shuffle it so when we chop off data it's from many NAIPs, not just the last one
+        shuffle_in_unison(training_images, onehot_training_labels)
+        shuffle_in_unison(test_images, onehot_test_labels)
+
+        # continue training the model with the new data set
+        model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
+                                training_images, args.neural_net, args.bands, args.tile_size,
+                                epoch, model)
+        epoch += 1
+
 
 def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images,
                     neural_net_type, band_list, tile_size, number_of_epochs, model):
