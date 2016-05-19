@@ -8,8 +8,8 @@ import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
 
-def analyze(onehot_training_labels, onehot_test_labels, test_images,
-            training_images, neural_net_type, band_list, tile_size, number_of_epochs, model):
+def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images, neural_net_type, 
+                    band_list, tile_size, number_of_epochs, model):
     '''
       package data for tensorflow and analyze
     '''
@@ -62,8 +62,8 @@ def analyze(onehot_training_labels, onehot_test_labels, test_images,
 
     return model
 
-    # batch predictions on the test image set, to avoid a memory spike
-    '''
+  def predictions_for_tiles(test_images, model):
+    """Batch predictions on the test image set, to avoid a memory spike."""
     all_predictions = []
     for x in range(0, len(test_images) - 100, 100):
         for p in model.predict(test_images[x:x + 100]):
@@ -74,4 +74,3 @@ def analyze(onehot_training_labels, onehot_test_labels, test_images,
     assert len(all_predictions) == len(test_images)
 
     return all_predictions
-    '''

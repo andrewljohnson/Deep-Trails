@@ -7,7 +7,7 @@
 import argparse
 import pickle
 
-from src.single_layer_network import analyze
+from src.single_layer_network import train_with_data, predictions_for_tiles
 from src.training_data import CACHE_PATH, load_training_tiles, equalize_data, split_train_test, format_as_onehot_arrays, shuffle_in_unison
 from src.training_visualization import render_results_for_analysis
 
@@ -84,17 +84,12 @@ def main():
         shuffle_in_unison(test_images, onehot_test_labels)
          
         # continue training the model with the new data set
-        model = analyze(onehot_training_labels, onehot_test_labels, test_images, training_images, args.neural_net, args.bands, args.tile_size, epoch, model)
+        model = train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images, args.neural_net, args.bands, args.tile_size, epoch, model)
         epoch += 1
 
-    '''
-    predictions = analyze(onehot_training_labels, onehot_test_labels, test_labels, training_labels,
-                          test_images, training_images, label_types, args.neural_net,
-                          args.bands, args.tile_size, args.number_of_epochs)
+    predictions = predictions_for_tiles(test_images, model)
     if args.render_results:
-        render_results_for_analysis(raster_data_paths, training_labels, test_labels, predictions,
-                                    args.band_list, args.tile_size)
-    '''
+        render_results_for_analysis(raster_data_paths, predictions, test_images, args.band_list, args.tile_size)
 
 if __name__ == "__main__":
     main()
