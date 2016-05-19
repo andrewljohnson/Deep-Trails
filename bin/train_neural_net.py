@@ -43,9 +43,9 @@ def main():
     args = parser.parse_args()
     with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
         raster_data_paths = pickle.load(infile)
-    train_on_cached_data(raster_data_paths)
-    predictions = predictions_for_tiles(test_images, model)
+    train_on_cached_data(raster_data_paths, args.neural_net, args.bands, args.tile_size)
     if args.render_results:
+        predictions = predictions_for_tiles(test_images, model)
         render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
                                     args.tile_size)
 

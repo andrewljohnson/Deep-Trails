@@ -9,11 +9,11 @@ from src.training_data import load_training_tiles, equalize_data, split_train_te
     format_as_onehot_arrays, shuffle_in_unison
 
 
-def train_on_cached_data(raster_data_paths):
+def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
     """Load tiled/cached data, which was prepared for the NAIPs listed in raster_data_paths.
 
-       Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
-       Keep the train and test sets to a max of 10K images by throwing out random data sometimes.
+    Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
+    Keep the train and test sets to a max of 10K images by throwing out random data sometimes.
     """
 
     training_images = []
@@ -55,7 +55,7 @@ def train_on_cached_data(raster_data_paths):
 
         # continue training the model with the new data set
         model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
-                                training_images, args.neural_net, args.bands, args.tile_size,
+                                training_images, neural_net_type, bands, tile_size,
                                 epoch, model)
         epoch += 1
 
