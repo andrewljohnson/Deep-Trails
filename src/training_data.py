@@ -370,10 +370,14 @@ def load_training_tiles(naip_path):
     filename = path_parts[len(path_parts) - 1]
     labels_path = CACHE_PATH + filename + '-labels.npy'
     images_path = CACHE_PATH + filename + '-images.npy'
-    with open(labels_path, 'r') as infile:
-        training_labels = numpy.load(infile)
-    with open(images_path, 'r') as infile:
-        training_images = numpy.load(infile)
+    try:
+        with open(labels_path, 'r') as infile:
+            training_labels = numpy.load(infile)
+        with open(images_path, 'r') as infile:
+            training_images = numpy.load(infile)
+    except:
+        print("WARNING, skipping file because pickled data bad for {}".format(naip_path))
+        return [], []
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_labels, training_images
 
