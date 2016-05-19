@@ -36,7 +36,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
 
         # read in another NAIP worth of data
         labels, images = load_training_tiles(path)
-        if not labels or not images:
+        if len(labels) == 0 or len(images) == 0:
           continue
         equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
         new_test_labels, training_labels, new_test_images, new_training_images = \

@@ -377,7 +377,7 @@ def load_training_tiles(naip_path):
             training_images = numpy.load(infile)
     except:
         print("WARNING, skipping file because pickled data bad for {}".format(naip_path))
-        return None, None
+        return [], []
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_labels, training_images
 
