@@ -62,6 +62,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
                                 training_images, neural_net_type, bands, tile_size,
                                 epoch, model)
         epoch += 1
+    return test_images, model
 
 
 def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images,

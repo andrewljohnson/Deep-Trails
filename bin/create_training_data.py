@@ -3,8 +3,6 @@
 """Create training data from OpenStreetMap labels and NAIP images."""
 
 import argparse
-import os
-import pickle
 
 from src.naip_images import NAIPDownloader
 from src.training_data import create_tiled_training_data, cache_paths
