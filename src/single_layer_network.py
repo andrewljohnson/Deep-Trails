@@ -43,6 +43,9 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
         if len(training_labels) == 0:
             print("WARNING: a naip image didn't have any road labels?")
             continue
+        if len(new_test_labels) == 0:
+            print("WARNING: a naip image didn't have any road images?")
+            continue
 
         # add it to the training and test lists
         [training_images.append(i) for i in new_training_images]
