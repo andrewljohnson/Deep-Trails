@@ -23,7 +23,6 @@ RUN apt-get -q update && \
    && \
  apt-get clean
 
-RUN apt-get install libjpeg8-dev
 # copy requirements.txt and run pip to install all dependencies into the virtualenv.
 ADD requirements_base.txt /DeepOSM/requirements_base.txt
 ADD requirements_cpu.txt /DeepOSM/requirements_cpu.txt
