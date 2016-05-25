@@ -395,20 +395,21 @@ def cache_paths(raster_data_paths):
 
 def tag_with_locations(test_images, predictions, tile_size):
     """Combine image data with label data, so info can be rendered in a map and list UI.
-    
+
     Add location data for convenience too.
     """
-  combined_data = []
-  for idx, img_loc_tuple in enumerate(test_images):
-    raster_dataset = gdal.Open(os.path.join(NAIP_DATA_DIR, img_loc_tuple[2]), gdal.GA_ReadOnly)
-    ne_lat, ne_lon = pixel_to_lat_lon(raster_dataset, img_loc_tuple[1][0]*tile_size+tile_size, 
-                                img_loc_tuple[1][1]*tile_size)
-    sw_lat, sw_lon = pixel_to_lat_lon(raster_dataset, img_loc_tuple[1][0]*tile_size, 
-                                img_loc_tuple[1][1]*tile_size+tile_size)
-    new_tuple = (img_loc_tuple[0], img_loc_tuple[1], img_loc_tuple[2], predictions[idx], 
-                 ne_lat, ne_lon, sw_lat, sw_lon)
-    print(new_tuple)
-    combined_data.append(new_tuple)
+    combined_data = []
+    for idx, img_loc_tuple in enumerate(test_images):
+        raster_dataset = gdal.Open(os.path.join(NAIP_DATA_DIR, img_loc_tuple[2]), gdal.GA_ReadOnly)
+        ne_lat, ne_lon = pixel_to_lat_lon(raster_dataset, img_loc_tuple[1][0] * tile_size +
+                                          tile_size, img_loc_tuple[1][1] * tile_size)
+        sw_lat, sw_lon = pixel_to_lat_lon(raster_dataset, img_loc_tuple[1][0] * tile_size,
+                                          img_loc_tuple[1][1] * tile_size + tile_size)
+        new_tuple = (img_loc_tuple[0], img_loc_tuple[1], img_loc_tuple[2], predictions[idx],
+                     ne_lat, ne_lon, sw_lat, sw_lon)
+        print(new_tuple)
+        combined_data.append(new_tuple)
+    return combined_data
 
 
 if __name__ == "__main__":

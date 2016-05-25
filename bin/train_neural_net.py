@@ -49,7 +49,8 @@ def main():
                                               args.tile_size)
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
-        mappable_predictions = tag_with_locations(test_images, predictions)
+        mappable_predictions = tag_with_locations(test_images, predictions, args.tile_size)
+        print(mappable_predictions)
         render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
                                     args.tile_size)
 
