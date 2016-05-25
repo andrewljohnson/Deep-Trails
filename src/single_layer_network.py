@@ -134,3 +134,4 @@ def predictions_for_tiles(test_images, model):
     assert len(all_predictions) == len(test_images)
 
     return all_predictions
+    

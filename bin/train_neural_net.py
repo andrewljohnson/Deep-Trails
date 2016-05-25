@@ -6,7 +6,7 @@ import argparse
 import pickle
 
 from src.single_layer_network import train_on_cached_data, predictions_for_tiles
-from src.training_data import CACHE_PATH
+from src.training_data import CACHE_PATH, tag_with_locations
 from src.training_visualization import render_results_for_analysis
 
 
@@ -47,6 +47,7 @@ def main():
                                               args.tile_size)
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
+        mappable_predictions = tag_with_locations(test_images, predictions)
         render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
                                     args.tile_size)
 
