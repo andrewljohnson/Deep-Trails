@@ -105,7 +105,8 @@ Images](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.232.1679&rep=re
 best/recent paper on doing this, great success with these methods
 * Similar Efforts with OSM Data
     * [OSM-Crosswalk-Detection](https://github.com/geometalab/OSM-Crosswalk-Detection) - uses Keras to detect crosswalks, a class project (Fall 2015)
-    * [OSM-HOT-ConvNet](https://github.com/larsroemheld/OSM-HOT-ConvNet) - attempted use for disaster response, author thinks it's only 69% accurate at pixel level (Fall 2016)
+    * [OSM-HOT-ConvNet](https://github.com/larsroemheld/OSM-HOT-ConvNet) - attempted use for disaster response, author thinks it's only 69% accurate at pixel level (fall 2016)
+    * [Terrapattern](http://www.terrapattern.com/) - (spring 2016) - detect similar images, such as pools, boat wakes, or other patterns journalists/researchers might be interested in - CMU researchers, open source
 * [Parsing Natural Scenes and Natural Language
 with Recursive Neural Networks (RNNs)](http://ai.stanford.edu/~ang/papers/icml11-ParsingWithRecursiveNeuralNetworks.pdf)
 * Links from the Tensorflow site
