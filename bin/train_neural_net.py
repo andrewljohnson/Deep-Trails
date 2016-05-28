@@ -52,6 +52,7 @@ def main():
                                               args.tile_size, args.number_of_epochs)
     if args.list_findings:
         for path in raster_data_paths:
+            print path
             labels, images = load_training_tiles(path)
             if len(labels) == 0 or len(images) == 0:
                 print("WARNING, there is a borked naip image file")
@@ -64,7 +65,7 @@ def main():
             tag_with_locations([], [], args.tile_size)
             # tag_with_locations(test_images, predictions, tile_size):
             # [false_positives.append(x) for x in false_negatives]
-            render_results_for_analysis(raster_data_paths, false_positives, fp_images, args.bands,
+            render_results_for_analysis([path], false_positives, fp_images, args.bands,
                                         args.tile_size)
             #render_results_for_analysis(raster_data_paths, false_negatives, fn_images, args.bands,
             #                            args.tile_size)
