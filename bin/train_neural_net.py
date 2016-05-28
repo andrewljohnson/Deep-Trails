@@ -20,19 +20,19 @@ def create_parser():
                         type=int,
                         help="tile the NAIP and training data into NxN tiles with this dimension")
     parser.add_argument("--bands",
-                        default=[0, 0, 0, 1],
+                        default=[1, 1, 1, 1],
                         nargs=4,
                         type=int,
                         help="specify which bands to activate (R  G  B  IR). default is "
-                        "--bands 0 0 0 1 (which activates only the IR band)")
+                        "--bands 1 1 1 1 (which activates all bands)")
+    parser.add_argument("--omit-findings",
+                        action='store_true',
+                        help="prevent display of predicted false positives overlaid on JPEGs")
     parser.add_argument("--render-results",
                         action='store_true',
                         help="output data/predictions to JPEG")
-    parser.add_argument("--omit-findings",
-                        action='store_true',
-                        help="display predicted false positives overlaid on JPEGs")
     parser.add_argument("--number-of-epochs",
-                        default=100,
+                        default=5,
                         type=int,
                         help="the number of epochs to batch the training data into")
     parser.add_argument("--neural-net",
