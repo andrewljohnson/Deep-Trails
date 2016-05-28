@@ -49,22 +49,27 @@ def main():
     with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
         raster_data_paths = pickle.load(infile)
     test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, args.bands,
-                                              args.tile_size)
-    if args.list_false_findings:
+                                              args.tile_size, args.number_of_epochs)
+    if args.list_findings:
         for path in raster_data_paths:
             labels, images = load_training_tiles(path)
             if len(labels) == 0 or len(images) == 0:
                 print("WARNING, there is a borked naip image file")
                 continue
             false_positives, false_negatives = list_findings(labels, images, model)
-            print("FINDINGS: {} false pos and {} false neg on {}".format(path,
-                                                                         len(false_positives),
-                                                                         len(false_negatives)))
+            path_parts = path.split('/')
+            filename = path_parts[len(path_parts) - 1]
+            print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
+                len(false_positives), len(false_negatives), len(images), filename))
+            tag_with_locations([], [], args.tile_size)
+            # tag_with_locations(test_images, predictions, tile_size):
+        render_results_for_analysis(raster_data_paths, false_positives, test_images, args.bands,
+                                    args.tile_size)
+        render_results_for_analysis(raster_data_paths, false_negatives, test_images, args.bands,
+                                    args.tile_size)
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
-        mappable_predictions = tag_with_locations(test_images, predictions, args.tile_size)
-        print(mappable_predictions)
         render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
                                     args.tile_size)
 
