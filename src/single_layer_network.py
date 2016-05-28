@@ -125,8 +125,6 @@ def sort_findings(model, test_images, labels, false_positives, false_negatives, 
             false_positives.append(p)
         elif not has_ways_in_center(label, 16) and p[0] <= .5:
             false_negatives.append(p)
-        else:
-            print(p)
         index += 1
     return index, false_positives, false_negatives
 
@@ -142,12 +140,12 @@ def list_findings(labels, test_images, model):
     index = 0
     for x in range(0, len(test_images) - 100, 100):
         images = test_images[x:x + 100]
-        index, false_positives, false_negatives = sort_findings(model, images, labels, 
-                                                                false_positives, false_negatives, 
+        index, false_positives, false_negatives = sort_findings(model, images, labels,
+                                                                false_positives, false_negatives,
                                                                 index)
     images = test_images[index:]
-    discard, false_positives, false_negatives = sort_findings(model, images, labels, 
-                                                              false_positives, false_negatives, 
+    discard, false_positives, false_negatives = sort_findings(model, images, labels,
+                                                              false_positives, false_negatives,
                                                               index)
     return false_positives, false_negatives
 

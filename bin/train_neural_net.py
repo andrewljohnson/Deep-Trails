@@ -61,8 +61,8 @@ def main():
             filename = path_parts[len(path_parts) - 1]
             print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
                 len(false_positives), len(false_negatives), len(images), filename))
-            tag_with_locations([], [], args.tile_size):
-            #tag_with_locations(test_images, predictions, tile_size):
+            tag_with_locations([], [], args.tile_size)
+            # tag_with_locations(test_images, predictions, tile_size):
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
