@@ -56,17 +56,18 @@ def main():
             if len(labels) == 0 or len(images) == 0:
                 print("WARNING, there is a borked naip image file")
                 continue
-            false_positives, false_negatives = list_findings(labels, images, model)
+            false_positives, false_negatives, fp_images, fn_images = list_findings(labels, images, model)
             path_parts = path.split('/')
             filename = path_parts[len(path_parts) - 1]
             print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
                 len(false_positives), len(false_negatives), len(images), filename))
             tag_with_locations([], [], args.tile_size)
             # tag_with_locations(test_images, predictions, tile_size):
-        render_results_for_analysis(raster_data_paths, false_positives, test_images, args.bands,
-                                    args.tile_size)
-        render_results_for_analysis(raster_data_paths, false_negatives, test_images, args.bands,
-                                    args.tile_size)
+            # [false_positives.append(x) for x in false_negatives]
+            render_results_for_analysis(raster_data_paths, false_positives, fp_images, args.bands,
+                                        args.tile_size)
+            #render_results_for_analysis(raster_data_paths, false_negatives, fn_images, args.bands,
+            #                            args.tile_size)
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)

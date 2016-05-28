@@ -115,17 +115,21 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
     return model
 
 
-def sort_findings(model, test_images, labels, false_positives, false_negatives, index):
+def sort_findings(model, test_images, labels, false_positives, false_negatives, fp_images, fn_images, index):
     """False positive if model says road doesn't exist, but OpenStreetMap says it does.
     False negative if model says road exists, but OpenStreetMap doesn't list it."""
+    pred_index = 0
     for p in model.predict(test_images):
         label = labels[index][0]
         if has_ways_in_center(label, 1) and p[0] > .5:
             false_positives.append(p)
+            fp_images.append(test_images[pred_index])
         elif not has_ways_in_center(label, 16) and p[0] <= .5:
             false_negatives.append(p)
+            fn_images.append(test_images[pred_index])
+        pred_index += 1
         index += 1
-    return index, false_positives, false_negatives
+    return index, false_positives, false_negatives, fp_images, fn_images
 
 
 def list_findings(labels, test_images, model):
@@ -136,17 +140,21 @@ def list_findings(labels, test_images, model):
 
     false_positives = []
     false_negatives = []
+    fp_images = []
+    fn_images = []
     index = 0
     for x in range(0, len(test_images) - 100, 100):
         images = test_images[x:x + 100]
-        index, false_positives, false_negatives = sort_findings(model, images, labels,
-                                                                false_positives, false_negatives,
-                                                                index)
+        index, false_positives, false_negatives, fp_images, fn_images = sort_findings(model, images, labels,
+                                                                                         false_positives, false_negatives,
+                                                                                         fp_images, fn_images,
+                                                                                         index)
     images = test_images[index:]
-    discard, false_positives, false_negatives = sort_findings(model, images, labels,
-                                                              false_positives, false_negatives,
-                                                              index)
-    return false_positives, false_negatives
+    discard, false_positives, false_negatives, fp_images, fn_images = sort_findings(model, images, labels,
+                                                                                       false_positives, false_negatives,
+                                                                                       fp_images, fn_images,
+                                                                                       index)
+    return false_positives, false_negatives, fp_images, fn_images
 
 
 def predictions_for_tiles(test_images, model):
