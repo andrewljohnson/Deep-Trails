@@ -49,7 +49,7 @@ def main():
     with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
         raster_data_paths = pickle.load(infile)
     test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, args.bands,
-                                              args.tile_size)
+                                              args.tile_size, args.number_of_epochs)
     if args.list_findings:
         for path in raster_data_paths:
             labels, images = load_training_tiles(path)

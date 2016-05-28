@@ -9,7 +9,7 @@ from src.training_data import load_training_tiles, equalize_data, \
     split_train_test, format_as_onehot_arrays, shuffle_in_unison, has_ways_in_center
 
 
-def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
+def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, number_of_epochs):
     """Load tiled/cached data, which was prepared for the NAIPs listed in raster_data_paths.
 
     Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
@@ -20,7 +20,6 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
     test_images = []
     onehot_test_labels = []
     model = None
-    epoch = 0
 
     for path in raster_data_paths:
         # keep test list to 1000 images
@@ -60,9 +59,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
         # continue training the model with the new data set
         model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
                                 training_images, neural_net_type, bands, tile_size,
-                                epoch, model)
-        if epoch <= 19:
-            epoch += 1
+                                number_of_epochs, model)
     return test_images, model
 
 
@@ -89,7 +86,7 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
 
         network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
         if neural_net_type == 'one_layer_relu':
-            network = tflearn.fully_connected(network, 512, activation='relu')
+            network = tflearn.fully_connected(network, 32, activation='relu')
         elif neural_net_type == 'one_layer_relu_conv':
             network = conv_2d(network, 256, 16, activation='relu')
             network = max_pool_2d(network, 3)
