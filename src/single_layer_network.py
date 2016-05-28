@@ -29,7 +29,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
         equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
         new_test_labels, training_labels, new_test_images, new_training_images = \
             split_train_test(equal_count_tile_list, equal_count_way_list, .9)
-        
+
         if len(training_labels) == 0:
             print("WARNING: a naip image didn't have any road labels?")
             continue
@@ -43,7 +43,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
         [onehot_training_labels.append(l) for l in format_as_onehot_arrays(training_labels)]
         [onehot_test_labels.append(l) for l in format_as_onehot_arrays(new_test_labels)]
 
-        # once we have 100 test_images, which might require more than one NAIP, train on a mini batch
+        # once we have 100 test_images, maybe from more than one NAIP, train on a mini batch
         if len(test_images) >= 100:
             # continue training the model with the new data set
             model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
@@ -103,7 +103,7 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
         net = tflearn.regression(softmax, optimizer=momentum, loss='categorical_crossentropy')
 
         model = tflearn.DNN(net, tensorboard_verbose=0)
-    
+
     model.fit(norm_train_images,
               npy_training_labels,
               n_epoch=number_of_epochs,
@@ -129,22 +129,30 @@ def list_findings(labels, test_images, model):
     for x in range(0, len(npy_test_images) - 100, 100):
         images = npy_test_images[x:x + 100]
         image_tuples = test_images[x:x + 100]
-        index, false_positives, false_negatives, fp_images, fn_images = sort_findings(model, image_tuples, images, labels,
-                                                                                         false_positives, false_negatives,
-                                                                                         fp_images, fn_images,
-                                                                                         index)
+        index,
+        false_positives,
+        false_negatives,
+        fp_images,
+        fn_images = sort_findings(model, image_tuples, images, labels, false_positives,
+                                  false_negatives, fp_images, fn_images, index)
     images = npy_test_images[index:]
     image_tuples = test_images[index:]
-    discard, false_positives, false_negatives, fp_images, fn_images = sort_findings(model, image_tuples, images, labels,
-                                                                                       false_positives, false_negatives,
-                                                                                       fp_images, fn_images,
-                                                                                       index)
+    index,
+    false_positives,
+    false_negatives,
+    fp_images,
+    fn_images = sort_findings(model, image_tuples, images, labels, false_positives,
+                              false_negatives, fp_images, fn_images, index)
+
     return false_positives, false_negatives, fp_images, fn_images
 
 
-def sort_findings(model, image_tuples, test_images, labels, false_positives, false_negatives, fp_images, fn_images, index):
+def sort_findings(model, image_tuples, test_images, labels, false_positives, false_negatives,
+                  fp_images, fn_images, index):
     """False positive if model says road doesn't exist, but OpenStreetMap says it does.
-    False negative if model says road exists, but OpenStreetMap doesn't list it."""
+
+    False negative if model says road exists, but OpenStreetMap doesn't list it.
+    """
     pred_index = 0
     for p in model.predict(test_images):
         label = labels[index][0]

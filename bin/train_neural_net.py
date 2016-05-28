@@ -9,7 +9,7 @@ import pickle
 # in order to import PIL before TFLearn - or PIL errors tryig to save a JPEG
 from src.training_visualization import render_results_for_analysis
 from src.single_layer_network import train_on_cached_data, predictions_for_tiles, list_findings
-from src.training_data import CACHE_PATH, tag_with_locations, load_training_tiles
+from src.training_data import CACHE_PATH, load_training_tiles
 
 
 def create_parser():
@@ -28,9 +28,9 @@ def create_parser():
     parser.add_argument("--render-results",
                         action='store_true',
                         help="output data/predictions to JPEG")
-    parser.add_argument("--list-findings",
+    parser.add_argument("--omit-findings",
                         action='store_true',
-                        help="list the most likely false negatives/positives in the OSM data")
+                        help="display predicted false positives overlaid on JPEGs")
     parser.add_argument("--number-of-epochs",
                         default=100,
                         type=int,
@@ -50,25 +50,21 @@ def main():
         raster_data_paths = pickle.load(infile)
     test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, args.bands,
                                               args.tile_size, args.number_of_epochs)
-    if args.list_findings:
+    if not args.omit_findings:
         for path in raster_data_paths:
             print path
             labels, images = load_training_tiles(path)
             if len(labels) == 0 or len(images) == 0:
                 print("WARNING, there is a borked naip image file")
                 continue
-            false_positives, false_negatives, fp_images, fn_images = list_findings(labels, images, model)
+            false_positives, false_negatives, fp_images, fn_images = list_findings(labels, images,
+                                                                                   model)
             path_parts = path.split('/')
             filename = path_parts[len(path_parts) - 1]
             print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
                 len(false_positives), len(false_negatives), len(images), filename))
-            tag_with_locations([], [], args.tile_size)
-            # tag_with_locations(test_images, predictions, tile_size):
-            # [false_positives.append(x) for x in false_negatives]
             render_results_for_analysis([path], false_positives, fp_images, args.bands,
                                         args.tile_size)
-            #render_results_for_analysis(raster_data_paths, false_negatives, fn_images, args.bands,
-            #                            args.tile_size)
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
