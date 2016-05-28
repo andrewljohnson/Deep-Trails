@@ -1,10 +1,11 @@
 # DeepOSM
 
-Detect roads and features in satellite imagery, by training neural networks with OpenStreetMap (OSM) data. This code lets you:
+Classify roads and features in satellite imagery, by training neural networks with OpenStreetMap (OSM) data. This code lets you:
 
 * Download a chunk of satellite imagery
 * Download OSM data that shows roads/features for that area
 * Generate training and evaluation data
+* Display predictions of mis-registered roads in OSM data, or display raw predictions of ON/OFF
 
 Running the code is as easy as install Docker, make dev, and run a script. 
 
@@ -12,14 +13,15 @@ Contributions are welcome. Open an issue if you want to discuss something to do,
 
 ## Default Data/Accuracy
 
-By default, DeepOSM will download the minimum necessary training data, and use the simplest possible network.
+By default, DeepOSM will analyze aboyt 200 sq. km of area in Delaware.
 
 * It will predict if the center 9px of a 64px tile contains road.
-* It will only use the infrared (IR) band, not the RGB bands.
-* It will be about 65% accurate, based on how the training/test data is constructed.
-* It will use a single fully connected relu layer in [TensorFlow](https://www.tensorflow.org/).
+* It will only use the infrared (IR) band and RGB bands.
+* It will be 75-80% accurate overall, training only for a minute or so.
+* It will use a single fully-connected relu layer in [TensorFlow](https://www.tensorflow.org/).
+* It will render, as JPEGs, "false positive" predictions in the OSM data - i.e. where OSM lists a road, but DeepOSM thinks theer isn't one.
 
-![NAIP with Ways and Predictions](https://pbs.twimg.com/media/CiZVcu8UgAIYA-c.jpg)
+![NAIP with Ways and Predictions](https://pbs.twimg.com/media/Cjk6fADUYAE0wvh.jpg)
 
 ## Background on Data - NAIPs and OSM PBF
 
@@ -68,7 +70,7 @@ make dev
 
 Inside Docker, the following Python scripts will work. This will download all source data, tile it into training/test data and labels, train the neural net, and generate image and text output. 
 
-The default data is eight NAIPs, which gets tiled into NxNx4 bands of data (RGB-IR bands). The training labels derive from PBF files that overlap the NAIPs.
+The default data is six NAIPs, which gets tiled into 64x64x4 bands of data (RGB-IR bands). The training labels derive from PBF files that overlap the NAIPs.
 
 ```
 python bin/create_training_data.py
@@ -109,10 +111,9 @@ best/recent paper on doing this, great success with these methods
     * [Terrapattern](http://www.terrapattern.com/) - (spring 2016) - detect similar images, such as pools, boat wakes, or other patterns journalists/researchers might be interested in - CMU researchers, open source
 * [Parsing Natural Scenes and Natural Language
 with Recursive Neural Networks (RNNs)](http://ai.stanford.edu/~ang/papers/icml11-ParsingWithRecursiveNeuralNetworks.pdf)
-* Links from the Tensorflow site
+* Background on Neural Networks and Deep Learning
     * [MNIST Data and Background](http://yann.lecun.com/exdb/mnist/)
     * all the other links to Nielsen’s book and [Colah’s blog](http://colah.github.io/posts/2015-08-Backprop/)
-* Deep Background
     * [original Information Theory paper by Shannon](http://worrydream.com/refs/Shannon%20-%20A%20Mathematical%20Theory%20of%20Communication.pdf)
 
 [Also see a work journal here](http://trailbehind.github.io/DeepOSM/).
