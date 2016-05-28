@@ -120,14 +120,14 @@ def sort_findings(model, test_images, labels, false_positives, false_negatives, 
     """False positive if model says road doesn't exist, but OpenStreetMap says it does.
     False negative if model says road exists, but OpenStreetMap doesn't list it."""
     for p in model.predict(test_images):
-      label = labels[index][0]
-      if has_ways_in_center(label, 1) and p[0] > .5:
-          false_positives.append(p)
-      elif not has_ways_in_center(label, 16) and p[0] <= .5:
-          false_negatives.append(p)
-      else:
-        print(p)
-      index += 1
+        label = labels[index][0]
+        if has_ways_in_center(label, 1) and p[0] > .5:
+            false_positives.append(p)
+        elif not has_ways_in_center(label, 16) and p[0] <= .5:
+            false_negatives.append(p)
+        else:
+            print(p)
+        index += 1
     return index, false_positives, false_negatives
 
 
