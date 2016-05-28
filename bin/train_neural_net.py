@@ -63,6 +63,10 @@ def main():
                 len(false_positives), len(false_negatives), len(images), filename))
             tag_with_locations([], [], args.tile_size)
             # tag_with_locations(test_images, predictions, tile_size):
+        render_results_for_analysis(raster_data_paths, false_positives, test_images, args.bands,
+                                    args.tile_size)
+        render_results_for_analysis(raster_data_paths, false_negatives, test_images, args.bands,
+                                    args.tile_size)
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
