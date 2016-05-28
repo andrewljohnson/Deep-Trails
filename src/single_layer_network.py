@@ -121,30 +121,36 @@ def list_findings(labels, test_images, model):
     npy_test_images = npy_test_images.astype(numpy.float32)
     npy_test_images = numpy.multiply(npy_test_images, 1.0 / 255.0)
 
-    false_positives = []
-    false_negatives = []
+    false_pos = []
+    false_neg = []
     fp_images = []
     fn_images = []
     index = 0
     for x in range(0, len(npy_test_images) - 100, 100):
         images = npy_test_images[x:x + 100]
         image_tuples = test_images[x:x + 100]
-        index,
-        false_positives,
-        false_negatives,
-        fp_images,
-        fn_images = sort_findings(model, image_tuples, images, labels, false_positives,
-                                  false_negatives, fp_images, fn_images, index)
+        index, false_pos, false_neg, fp_images, fn_images = sort_findings(model,
+                                                                          image_tuples,
+                                                                          images,
+                                                                          labels,
+                                                                          false_pos,
+                                                                          false_neg,
+                                                                          fp_images,
+                                                                          fn_images,
+                                                                          index)
     images = npy_test_images[index:]
     image_tuples = test_images[index:]
-    index,
-    false_positives,
-    false_negatives,
-    fp_images,
-    fn_images = sort_findings(model, image_tuples, images, labels, false_positives,
-                              false_negatives, fp_images, fn_images, index)
+    index, false_pos, false_neg, fp_images, fn_images = sort_findings(model,
+                                                                      image_tuples,
+                                                                      images,
+                                                                      labels,
+                                                                      false_pos,
+                                                                      false_neg,
+                                                                      fp_images,
+                                                                      fn_images,
+                                                                      index)
 
-    return false_positives, false_negatives, fp_images, fn_images
+    return false_pos, false_neg, fp_images, fn_images
 
 
 def sort_findings(model, image_tuples, test_images, labels, false_positives, false_negatives,
