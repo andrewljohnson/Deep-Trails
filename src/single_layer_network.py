@@ -119,6 +119,21 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
     return model
 
 
+def sort_findings(model, test_images, labels, false_positives, false_negatives, index):
+    """False positive if model says road doesn't exist, but OpenStreetMap says it does.
+    False negative if model says road exists, but OpenStreetMap doesn't list it."""
+    for p in model.predict(test_images):
+      label = labels[index][0]
+      if has_ways_in_center(label, 1) and p[0] > .5:
+          false_positives.append(p)
+      elif not has_ways_in_center(label, 16) and p[0] <= .5:
+          false_negatives.append(p)
+      else:
+        print(p)
+      index += 1
+    return index, false_positives, false_negatives
+
+
 def list_findings(labels, test_images, model):
     """Serialize a list of high probability false negatives and positives in the OSM data."""
     npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
@@ -129,22 +144,14 @@ def list_findings(labels, test_images, model):
     false_negatives = []
     index = 0
     for x in range(0, len(test_images) - 100, 100):
-        for p in model.predict(test_images[x:x + 100]):
-            label = labels[index]
-            if has_ways_in_center(label, 1) and p[0] > .5:
-                false_positives.append(x)
-            elif not has_ways_in_center(label, 16) and p[1] > .5:
-                false_negatives.append(x)
-            index += 1
-
-    for p in model.predict(test_images[index:]):
-        label = labels[index]
-        if has_ways_in_center(label, 1) and p[0] > .5:
-            false_positives.append(x)
-        elif not has_ways_in_center(label, 16) and p[1] > .5:
-            false_negatives.append(x)
-        index += 1
-
+        images = test_images[x:x + 100]
+        index, false_positives, false_negatives = sort_findings(model, images, labels, 
+                                                                false_positives, false_negatives, 
+                                                                index)
+    images = test_images[index:]
+    discard, false_positives, false_negatives = sort_findings(model, images, labels, 
+                                                              false_positives, false_negatives, 
+                                                              index)
     return false_positives, false_negatives
 
 
