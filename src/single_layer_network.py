@@ -5,8 +5,8 @@ import numpy
 import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
-from src.training_data import load_training_tiles, equalize_data, split_train_test, \
-    format_as_onehot_arrays, shuffle_in_unison
+from src.training_data import load_training_tiles, equalize_data, \
+    split_train_test, format_as_onehot_arrays, shuffle_in_unison, has_ways_in_center
 
 
 def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size):
@@ -119,6 +119,35 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
     return model
 
 
+def list_findings(labels, test_images, model):
+    """Serialize a list of high probability false negatives and positives in the OSM data."""
+    npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
+    test_images = npy_test_images.astype(numpy.float32)
+    test_images = numpy.multiply(test_images, 1.0 / 255.0)
+
+    false_positives = []
+    false_negatives = []
+    index = 0
+    for x in range(0, len(test_images) - 100, 100):
+        for p in model.predict(test_images[x:x + 100]):
+            label = labels[index]
+            if has_ways_in_center(label, 1) and p[0] > .5:
+                false_positives.append(x)
+            elif not has_ways_in_center(label, 16) and p[1] > .5:
+                false_negatives.append(x)
+            index += 1
+
+    for p in model.predict(test_images[index:]):
+        label = labels[index]
+        if has_ways_in_center(label, 1) and p[0] > .5:
+            false_positives.append(x)
+        elif not has_ways_in_center(label, 16) and p[1] > .5:
+            false_negatives.append(x)
+        index += 1
+
+    return false_positives, false_negatives
+
+
 def predictions_for_tiles(test_images, model):
     """Batch predictions on the test image set, to avoid a memory spike."""
     npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
@@ -135,4 +164,3 @@ def predictions_for_tiles(test_images, model):
     assert len(all_predictions) == len(test_images)
 
     return all_predictions
-    

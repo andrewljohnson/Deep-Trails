@@ -228,7 +228,7 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         with open(labels_path, 'w') as outfile:
             numpy.save(outfile, numpy.asarray(road_labels))
 
-        # dump the tiled i,ages from the NAIP to disk
+        # dump the tiled images from the NAIP to disk
         with open(images_path, 'w') as outfile:
             numpy.save(outfile, numpy.asarray(naip_tiles))
 
