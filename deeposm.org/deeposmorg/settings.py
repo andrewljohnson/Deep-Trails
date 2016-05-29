@@ -55,7 +55,7 @@ ROOT_URLCONF = 'deeposmorg.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['deeposmorg/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
