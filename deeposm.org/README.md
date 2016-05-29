@@ -1,6 +1,6 @@
 # DeepOSM.org
 
-A website to browse OpenStreetMap erros detected by DeepOSM, using Django, Postgres, and Docker.
+A website to browse OpenStreetMap errors detected by DeepOSM, using Django, Postgres, and Docker.
 
 ## Run the Site Locally
 

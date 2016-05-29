@@ -1,0 +1,23 @@
+<!-- View a DeepOSM predicted error on the map.
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+		<h3><span class=gray-span>{{ analysis_title }}</span> - Error ID {{ error.id }}</h3>
+		<table>
+		    <tr>
+		        <td>
+		            Certainty {{error.certainty}}
+		        </td>
+		        <td>
+		            <span class=gray-span>NE</span> {{error.neLat}}, {{error.neLon}}
+		        </td>
+		        <td>
+			          <span class=gray-span>SW</span> {{error.swLat}}, {{error.swLon}}
+		        </td>
+    	  </tr>
+		</table>
+
+{% endblock %}
