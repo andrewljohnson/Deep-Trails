@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from django.template import loader
 import boto3
+import os
+import settings
 
 TEST_ERROR_DICT = {'id':1, 'certainty':.6, 'source_image': 'http://foo/some_naip.tiff', 
                'source_image_x':2, 'source_image_y':3, 'tile_size': 64, 
@@ -27,8 +29,9 @@ def view_error(request, analysis_type, error_id):
 
 def list_errors(request, analysis_type, country_abbrev, state_name):
     """List all the errors of a given type in the country/state"""
-    s3_client = boto3.client('s3')
-    s3_client.download_file('deeposm', 'deeposm/finsings.pickle', 'static/findings.pickle')
+    s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+                              aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
 
     template = loader.get_template('list_errors.html')
     errors = [TEST_ERROR_DICT]
