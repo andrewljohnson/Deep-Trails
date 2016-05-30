@@ -407,7 +407,6 @@ def tag_with_locations(test_images, predictions, tile_size):
                                           img_loc_tuple[1][1] * tile_size + tile_size)
         new_tuple = (img_loc_tuple[0], img_loc_tuple[1], img_loc_tuple[2], predictions[idx],
                      ne_lat, ne_lon, sw_lat, sw_lon)
-        print(new_tuple)
         combined_data.append(new_tuple)
     return combined_data
 
