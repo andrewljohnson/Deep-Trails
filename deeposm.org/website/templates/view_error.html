@@ -20,7 +20,7 @@
 		  	  	   <span class=gray-span>{{ analysis_title }}</span> - Error ID {{ error.id }}
 		  	  </td>
 		      <td>
-		            Certainty {{error.certainty}}
+		            Likely Error {{error.certainty}}
 		      </td>
 		      <td>
 		          <span class=gray-span>NE</span> {{error.neLat}}, {{error.neLon}}
@@ -46,6 +46,8 @@
             maxZoom: 17, })
         osmLayer.addTo(mymap);
         osmLayer.setOpacity(.25);
+
+        // https://www.openstreetmap.org/edit#map=16/26.5626/-81.7465
 
     </script>
 
