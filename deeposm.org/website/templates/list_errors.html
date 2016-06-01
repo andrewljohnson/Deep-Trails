@@ -8,6 +8,7 @@
 		<h3>{{ analysis_title }} <span class=gray-span>({{ country_abbrev }}, {{ state_name|capfirst }})</span></h3>
 		<table>
 				{% for error in errors %}
+				    {{error}}
 				    <tr>
 				        <td>
 				            <a href="/{{ analysis_type }}/view/{{ error.id }}/">

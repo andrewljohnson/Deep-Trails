@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.template import loader
 import boto3
 import os
+import pickle
 import settings
 
 TEST_ERROR_DICT = {'id':1, 'certainty':.6, 'source_image': 'http://foo/some_naip.tiff', 
@@ -34,7 +35,9 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
     s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
 
     template = loader.get_template('list_errors.html')
-    errors = [TEST_ERROR_DICT]
+    with open('website/static/findings.pickle', 'r') as infile:
+        errors = pickle.load(infile)
+        print errors
     context = {
       'country_abbrev': country_abbrev,
       'state_name': state_name,
