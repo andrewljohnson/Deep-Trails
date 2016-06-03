@@ -70,16 +70,16 @@ def main():
                                         args.tile_size)
 
             # combine findings for all NAIP images analyzed
-            [findings.append(f) for f in tag_with_locations(fp_images, false_positives, args.tile_size)]
-        
+            [findings.append(f) for f in tag_with_locations(fp_images, false_positives, 
+                                                            args.tile_size)]
+
         # dump combined findings to disk as a pickle
         with open(CACHE_PATH + 'findings.pickle', 'w') as outfile:
             pickle.dump(findings, outfile)
-        
+
         # push pickle to S3
         s3_client = boto3.client('s3')
         s3_client.upload_file(CACHE_PATH + 'findings.pickle', 'deeposm', 'findings.pickle')
-
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
