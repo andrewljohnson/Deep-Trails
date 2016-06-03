@@ -17,29 +17,19 @@
 		<table>
 		  <tr>
 		  	  <td>
-		  	  	   <span class=gray-span>{{ analysis_title }}</span> - Error ID {{ error_id }}
+		  	  	   <span class=gray-span>{{ analysis_title }}</span> - #{{ error_id }}
 		  	  </td>
 		      <td>
-		            Likely Error {{error.0}}
-		      </td>
-		      <td>
-		          <span class=gray-span>NE</span> {{error.1}}, {{error.2}}
-		      </td>
-		      <td>
-			        <span class=gray-span>SW</span> {{error.3}}, {{error.4}}
+		            Likely Error {% widthratio error.0 1 100 %}%
 		      </td>
     	  </tr>
 		</table>
-        {{error.1}}, {{error.2}}
     	<div id="mapid"></div>
 		
 		<script type="text/javascript">
-        var centerLon = ({{error.4}} + {{error.2}})/2
-        var centerLat = ({{error.3}} + {{error.1}})/2
-        alert([centerLon, centerLat])
-        var mymap = L.map('mapid').setView([centerLon, centerLat], 15);
+        var mymap = L.map('mapid').setView([{{error.4}}, {{error.3}}], 18);
 
-        var satLayer = L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png', {
+        var satLayer = L.tileLayer('http://a.tiles.mapbox.com/v3/trailbehind.map-e7o3271e/{z}/{x}/{y}.png', {
             attribution: 'MapQuest',
             maxZoom: 18, })
         satLayer.addTo(mymap);
