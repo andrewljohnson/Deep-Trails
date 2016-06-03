@@ -37,6 +37,7 @@ def pixel_to_lat_lon(raster_dataset, col, row):
 
 
 def pixel_to_lat_lon_web_mercator(raster_dataset, col, row):
+    """Convert a pixel on the raster_dataset to web mercator (epsg:3857)."""
     spatial_reference = osr.SpatialReference()    
     spatial_reference.ImportFromWkt(raster_dataset.GetProjection())
     ds_spatial_reference_proj_string = spatial_reference.ExportToProj4()
@@ -44,10 +45,9 @@ def pixel_to_lat_lon_web_mercator(raster_dataset, col, row):
     outProj = Proj(init='epsg:3857')
     
     geo_transform = raster_dataset.GetGeoTransform()
-    ulon = col * geo_transform[1] + geo_transform[0]
-    ulat = row * geo_transform[5] + geo_transform[3]
+    ulon = (col * geo_transform[1]) + geo_transform[0]
+    ulat = (row * geo_transform[5]) + geo_transform[3]
 
-    x2,y2 = transform(inProj,outProj,ulon,ulat)
-    x2, y2 = outProj(x2,y2,inverse=True)
-    print "{} {}".format(x2,y2)
+    x2,y2 = transform(inProj, outProj, ulon, ulat)
+    x2, y2 = outProj(x2, y2, inverse=True)
     return x2,y2
