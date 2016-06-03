@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 import boto3
+import json
 import os
 import pickle
 import settings
@@ -18,10 +19,14 @@ def home(request):
 
 def view_error(request, analysis_type, error_id):
     """View the error with the given error_id"""
+    cache_findings()
     template = loader.get_template('view_error.html')
-    error = TEST_ERROR_DICT
+    with open('website/static/findings.pickle', 'r') as infile:
+        error = pickle.load(infile)[int(error_id)]
     context = {
+      'error_id': error_id,
       'error': error,
+      'json_error': json.dumps(error),
       'analysis_title': analysis_type.replace('-',' ').title(),
       'analysis_type': analysis_type,
     }
@@ -30,14 +35,10 @@ def view_error(request, analysis_type, error_id):
 
 def list_errors(request, analysis_type, country_abbrev, state_name):
     """List all the errors of a given type in the country/state"""
-    s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
-                              aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
-
+    cache_findings()
     template = loader.get_template('list_errors.html')
     with open('website/static/findings.pickle', 'r') as infile:
         errors = pickle.load(infile)
-        print errors
     context = {
       'country_abbrev': country_abbrev,
       'state_name': state_name,
@@ -46,3 +47,11 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
       'errors': errors,
     }    
     return HttpResponse(template.render(context, request))
+
+
+def cache_findings():
+    if not os.path.exists('website/static/findings.pickle'):
+      s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+                            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+      s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
+

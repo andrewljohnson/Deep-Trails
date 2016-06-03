@@ -116,7 +116,7 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
 
 
 def list_findings(labels, test_images, model):
-    """Serialize a list of high probability false negatives and positives in the OSM data."""
+    """Return lists of predicted false negative/positive labels/data."""
     npy_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
     npy_test_images = npy_test_images.astype(numpy.float32)
     npy_test_images = numpy.multiply(npy_test_images, 1.0 / 255.0)

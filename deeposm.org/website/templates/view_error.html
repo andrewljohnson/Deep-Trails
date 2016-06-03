@@ -17,35 +17,42 @@
 		<table>
 		  <tr>
 		  	  <td>
-		  	  	   <span class=gray-span>{{ analysis_title }}</span> - Error ID {{ error.id }}
+		  	  	   <span class=gray-span>{{ analysis_title }}</span> - Error ID {{ error_id }}
 		  	  </td>
 		      <td>
-		            Likely Error {{error.certainty}}
+		            Likely Error {{error.0}}
 		      </td>
 		      <td>
-		          <span class=gray-span>NE</span> {{error.neLat}}, {{error.neLon}}
+		          <span class=gray-span>NE</span> {{error.1}}, {{error.2}}
 		      </td>
 		      <td>
-			        <span class=gray-span>SW</span> {{error.swLat}}, {{error.swLon}}
+			        <span class=gray-span>SW</span> {{error.3}}, {{error.4}}
 		      </td>
     	  </tr>
 		</table>
-
+        {{error.1}}, {{error.2}}
     	<div id="mapid"></div>
 		
 		<script type="text/javascript">
-        var mymap = L.map('mapid').setView([{{error.neLat}}, {{error.neLon}}], 13);
+        var mymap = L.map('mapid').setView([{{error.3}}, {{error.4}}], 13);
 
         var satLayer = L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png', {
             attribution: 'MapQuest',
-            maxZoom: 17, })
+            maxZoom: 22, })
         satLayer.addTo(mymap);
 
         var osmLayer = L.tileLayer('http://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            maxZoom: 17, })
+            maxZoom: 22, })
         osmLayer.addTo(mymap);
         osmLayer.setOpacity(.25);
+
+        /*mymap.fitBounds([
+           [{{error.2}}, {{error.1}}]
+            [{{error.4}}, {{error.3}}]
+        ]);*/
+
+
 
         // https://www.openstreetmap.org/edit#map=16/26.5626/-81.7465
 
