@@ -1,6 +1,5 @@
 """Methods for working with geo/raster data."""
 
-from functools import 
 from osgeo import osr
 from pyproj import Proj, transform
 
@@ -42,13 +41,13 @@ def pixel_to_lat_lon_web_mercator(raster_dataset, col, row):
     spatial_reference = osr.SpatialReference()
     spatial_reference.ImportFromWkt(raster_dataset.GetProjection())
     ds_spatial_reference_proj_string = spatial_reference.ExportToProj4()
-    inProj = Proj(ds_spatial_reference_proj_string)
-    outProj = Proj(init='epsg:3857')
+    in_proj = Proj(ds_spatial_reference_proj_string)
+    out_proj = Proj(init='epsg:3857')
 
     geo_transform = raster_dataset.GetGeoTransform()
     ulon = col * geo_transform[1] + geo_transform[0]
     ulat = row * geo_transform[5] + geo_transform[3]
 
-    x2, y2 = transform(inProj, outProj, ulon, ulat)
-    x2, y2 = outProj(x2, y2, inverse=True)
-    return x2,y2
+    x2, y2 = transform(in_proj, out_proj, ulon, ulat)
+    x2, y2 = out_proj(x2, y2, inverse=True)
+    return x2, y2

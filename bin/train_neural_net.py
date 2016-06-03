@@ -70,7 +70,7 @@ def main():
                                         args.tile_size)
 
             # combine findings for all NAIP images analyzed
-            [findings.append(f) for f in tag_with_locations(fp_images, false_positives, 
+            [findings.append(f) for f in tag_with_locations(fp_images, false_positives,
                                                             args.tile_size)]
 
         # dump combined findings to disk as a pickle
