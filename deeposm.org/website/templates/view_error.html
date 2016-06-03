@@ -34,11 +34,14 @@
     	<div id="mapid"></div>
 		
 		<script type="text/javascript">
-        var mymap = L.map('mapid').setView([{{error.3}}, {{error.4}}], 13);
+        var centerLon = ({{error.4}} + {{error.2}})/2
+        var centerLat = ({{error.3}} + {{error.1}})/2
+        alert([centerLon, centerLat])
+        var mymap = L.map('mapid').setView([centerLon, centerLat], 15);
 
         var satLayer = L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png', {
             attribution: 'MapQuest',
-            maxZoom: 22, })
+            maxZoom: 18, })
         satLayer.addTo(mymap);
 
         var osmLayer = L.tileLayer('http://b.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -46,14 +49,7 @@
             maxZoom: 22, })
         osmLayer.addTo(mymap);
         osmLayer.setOpacity(.25);
-
-        /*mymap.fitBounds([
-           [{{error.2}}, {{error.1}}]
-            [{{error.4}}, {{error.3}}]
-        ]);*/
-
-
-
+        
         // https://www.openstreetmap.org/edit#map=16/26.5626/-81.7465
 
     </script>
