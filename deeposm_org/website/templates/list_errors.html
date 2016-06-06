@@ -10,7 +10,7 @@
 				{% for error in errors %}
 				    <tr>
 				        <td>
-				            <a href="/{{ analysis_type }}/view/{{ forloop.counter }}/">
+				            <a href="/{{ analysis_type }}/view/{{ forloop.counter0 }}/">
 				                Likely Error: {% widthratio error.0 1 100 %}% - View on Map
 				            </a>
 				        </td>
