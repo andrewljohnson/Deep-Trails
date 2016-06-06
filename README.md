@@ -2,6 +2,10 @@
 
 Classify roads and features in satellite imagery, by training neural networks with OpenStreetMap (OSM) data. 
 
+## New Alpha Release: DeepOSM.org
+
+[DeepOSM.org](http://www.deeposm.org/) now shows some predicted errors from DeepOSM.
+
 DeepOSM can:
 
 * Download a chunk of satellite imagery
