@@ -22,7 +22,7 @@ NAIP_PIXEL_BUFFER = 300
 
 # where training data gets cached/retrieved
 CACHE_PATH = '/DeepOSM/data/cache/'
-
+METADATA_FILEPATH = 'training_metadata.pickle'
 
 def read_naip(file_path, bands_to_use):
     """
@@ -231,6 +231,11 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         # dump the tiled images from the NAIP to disk
         with open(images_path, 'w') as outfile:
             numpy.save(outfile, numpy.asarray(naip_tiles))
+
+    # dump the metadata to disk for configuring the analysis script later
+    training_info = {bands: band_list, tile_size: tile_size}
+    with open(CACHE_PATH + METADATA_FILEPATH, 'w') as outfile:
+        pickle.dump(training_info, outfile)
 
 
 def shuffle_in_unison(a, b):

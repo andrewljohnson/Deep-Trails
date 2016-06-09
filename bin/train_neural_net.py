@@ -16,16 +16,6 @@ from src.training_data import CACHE_PATH, load_training_tiles, tag_with_location
 def create_parser():
     """Create the argparse parser."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tile-size",
-                        default=64,
-                        type=int,
-                        help="tile the NAIP and training data into NxN tiles with this dimension")
-    parser.add_argument("--bands",
-                        default=[1, 1, 1, 1],
-                        nargs=4,
-                        type=int,
-                        help="specify which bands to activate (R  G  B  IR). default is "
-                        "--bands 1 1 1 1 (which activates all bands)")
     parser.add_argument("--omit-findings",
                         action='store_true',
                         help="prevent display of predicted false positives overlaid on JPEGs")
@@ -49,8 +39,12 @@ def main():
     args = parser.parse_args()
     with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
         raster_data_paths = pickle.load(infile)
-    test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, args.bands,
-                                              args.tile_size, args.number_of_epochs)
+
+    with open(CACHE_PATH + METADATA_FILEPATH, 'r') as infile:
+        training_info = pickle.load(infile)
+
+    test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, training_info['bands'],
+                                              training_info['tile_size'], args.number_of_epochs)
     if not args.omit_findings:
         findings = []
         for path in raster_data_paths:
@@ -66,12 +60,12 @@ def main():
             print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
                 len(false_positives), len(false_negatives), len(images), filename))
             # render JPEGs showing findings
-            render_results_for_analysis([path], false_positives, fp_images, args.bands,
-                                        args.tile_size)
+            render_results_for_analysis([path], false_positives, fp_images, training_info['bands'],
+                                        training_info['tile_size'])
 
             # combine findings for all NAIP images analyzed
             [findings.append(f) for f in tag_with_locations(fp_images, false_positives,
-                                                            args.tile_size)]
+                                                            training_info['tile_size'])]
 
         # dump combined findings to disk as a pickle
         with open(CACHE_PATH + 'findings.pickle', 'w') as outfile:
@@ -83,8 +77,8 @@ def main():
 
     if args.render_results:
         predictions = predictions_for_tiles(test_images, model)
-        render_results_for_analysis(raster_data_paths, predictions, test_images, args.bands,
-                                    args.tile_size)
+        render_results_for_analysis(raster_data_paths, predictions, test_images, training_info['bands'],
+                                    training_info['tile_size'])
 
 
 if __name__ == "__main__":
