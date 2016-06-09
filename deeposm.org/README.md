@@ -33,3 +33,17 @@ Per tutorial, if you search for the terms ‘WSGI’ in the file, and you should
 Then:
 
     eb deploy
+
+## Data Displayed
+
+The production findings are currently created and posted to S3 for by running these commands, using DeepOSM. It includes two US states now.
+
+For Delaware:
+
+    python bin/create_training_data.py --number-of-naips=-1
+    pythin bin/train_neural_net --neural-net one_layer_relu_conv 
+
+For Maine:
+
+    python bin/create_training_data.py --naip-path 'me' 2013 --label-data-files 'http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf' --number-of-naips=-1
+    pythin bin/train_neural_net --neural-net one_layer_relu_conv 

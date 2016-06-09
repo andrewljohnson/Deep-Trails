@@ -40,6 +40,7 @@ def create_parser():
                              "--bands 1 1 1 1 (which activates only all bands)")
     parser.add_argument(
         "--label-data-files",
+        nargs='+',
         default=[
             'http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf',
         ],

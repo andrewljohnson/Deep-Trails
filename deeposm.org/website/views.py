@@ -8,9 +8,12 @@ import os
 import pickle
 import settings
 
+FINDINGS_S3_BUCKET = 'deeposm'
+
 STATE_NAMES_TO_ABBREVS = {
     'delaware': 'de',
-    'new-hampshire': 'nh',
+    'maine': 'me',
+    'new-hampshire': 'nh', #nh is unused
 }
 
 
@@ -64,13 +67,17 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 def cache_findings():
     """Download findings from S3."""
     s3 = boto3.resource('s3')
-    deeposm_bucket = s3.Bucket('deeposm')
+    deeposm_bucket = s3.Bucket(FINDINGS_S3_BUCKET)
     for obj in deeposm_bucket.objects.all():
         local_path = 'website/static/' + obj.key
+        try:
+            os.mkdir('website/static/' + obj.key.split('/')[0])
+        except:
+            pass
         if not os.path.exists(local_path):
             s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-            s3_client.download_file('deeposm', obj.key, local_path)
+            s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
             print("DOWNLOADED {}".format(obj.key))
         else:
             print("ALREADY DOWNLOADED {}".format(obj.key))
