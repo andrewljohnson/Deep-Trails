@@ -16,12 +16,9 @@ from src.training_data import CACHE_PATH, METADATA_PATH, load_training_tiles, ta
 def create_parser():
     """Create the argparse parser."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--omit-findings",
-                        action='store_true',
-                        help="prevent display of predicted false positives overlaid on JPEGs")
     parser.add_argument("--render-results",
                         action='store_true',
-                        help="output data/predictions to JPEG")
+                        help="output data/predictions to JPEG, in addition to normal JSON")
     parser.add_argument("--number-of-epochs",
                         default=5,
                         type=int,
@@ -46,41 +43,36 @@ def main():
     test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, 
                                               training_info['bands'], training_info['tile_size'], 
                                               args.number_of_epochs)
-    if not args.omit_findings:
-        findings = []
-        for path in raster_data_paths:
-            print path
-            labels, images = load_training_tiles(path)
-            if len(labels) == 0 or len(images) == 0:
-                print("WARNING, there is a borked naip image file")
-                continue
-            false_positives, false_negatives, fp_images, fn_images = list_findings(labels, images,
-                                                                                   model)
-            path_parts = path.split('/')
-            filename = path_parts[len(path_parts) - 1]
-            print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
-                len(false_positives), len(false_negatives), len(images), filename))
+    findings = []
+    for path in raster_data_paths:
+        labels, images = load_training_tiles(path)
+        if len(labels) == 0 or len(images) == 0:
+            print("WARNING, there is a borked naip image file")
+            continue
+        false_positives, false_negatives, fp_images, fn_images = list_findings(labels, images,
+                                                                               model)
+        path_parts = path.split('/')
+        filename = path_parts[len(path_parts) - 1]
+        print("FINDINGS: {} false pos and {} false neg, of {} tiles, from {}".format(
+            len(false_positives), len(false_negatives), len(images), filename))
+        if args.render_results:
             # render JPEGs showing findings
             render_results_for_analysis([path], false_positives, fp_images, training_info['bands'],
-                                        training_info['tile_size'])
-
-            # combine findings for all NAIP images analyzed
-            [findings.append(f) for f in tag_with_locations(fp_images, false_positives,
-                                                            training_info['tile_size'])]
-
-        # dump combined findings to disk as a pickle
-        with open(CACHE_PATH + 'findings.pickle', 'w') as outfile:
-            pickle.dump(findings, outfile)
-
-        # push pickle to S3
-        s3_client = boto3.client('s3')
-        remote_path = training_info['naip_state'] + '/findings.pickle'
-        s3_client.upload_file(CACHE_PATH + 'findings.pickle', 'deeposm', 'findings.pickle')
-
-    if args.render_results:
-        predictions = predictions_for_tiles(test_images, model)
-        render_results_for_analysis(raster_data_paths, predictions, test_images, training_info['bands'],
                                     training_info['tile_size'])
+
+        # combine findings for all NAIP images analyzedfor the region
+        [findings.append(f) for f in tag_with_locations(fp_images, false_positives,
+                                                        training_info['tile_size'])]
+
+    # dump combined findings to disk as a pickle
+    naip_path_in_cache_dir = training_info['naip_state'] + '/' + 'findings.pickle'
+    local_path = CACHE_PATH + naip_path_in_cache_dir
+    with open(local_path, 'w') as outfile:
+        pickle.dump(findings, outfile)
+
+    # push pickle to S3
+    s3_client = boto3.client('s3')
+    s3_client.upload_file(local_path, 'deeposm', naip_path_in_cache_dir)
 
 
 if __name__ == "__main__":

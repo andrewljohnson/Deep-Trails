@@ -66,12 +66,11 @@ def cache_findings():
     s3 = boto3.resource('s3')
     deeposm_bucket = s3.Bucket('deeposm')
     for obj in deeposm_bucket.objects.all():
-        print(obj.key)    
         local_path = 'website/static/' + obj.key
         if not os.path.exists(local_path):
             s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-            s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
+            s3_client.download_file('deeposm', obj.key, local_path)
             print("DOWNLOADED {}".format(obj.key))
         else:
             print("ALREADY DOWNLOADED {}".format(obj.key))

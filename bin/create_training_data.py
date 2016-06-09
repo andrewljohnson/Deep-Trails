@@ -50,7 +50,7 @@ def create_parser():
                         nargs=2,
                         type=str,
                         help="specify the state and year for the NAIPs to analyze"
-                             "--naip-path md 2013 (defaults to some Delaware data)")
+                             "--naip-path de 2013 (defaults to some Delaware data)")
     parser.add_argument("--randomize-naips",
                         default=False,
                         action='store_false',
