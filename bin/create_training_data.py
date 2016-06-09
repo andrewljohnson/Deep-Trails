@@ -73,8 +73,8 @@ def create_parser():
 def main():
     """Download NAIP images, PBF files, and serialize training data."""
     args = create_parser().parse_args()
-    NAIP_STATE, NAIP_YEAR = args.naip_path
-    naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, NAIP_STATE, NAIP_YEAR)
+    naip_state, naip_year = args.naip_path
+    naiper = NAIPDownloader(args.number_of_naips, args.randomize_naips, naip_state, naip_year)
     raster_data_paths = naiper.download_naips()
     cache_paths(raster_data_paths)
     create_tiled_training_data(raster_data_paths, args.extract_type, args.bands, args.tile_size,
