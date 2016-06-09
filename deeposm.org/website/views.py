@@ -8,9 +8,10 @@ import os
 import pickle
 import settings
 
-TEST_ERROR_DICT = {'id': 1, 'certainty': .6, 'source_image': 'http://foo/some_naip.tiff',
-                   'source_image_x': 2, 'source_image_y': 3, 'tile_size': 64,
-                   'neLat': 32, 'neLon': -112, 'swLat': 31, 'swLon': -113}
+STATE_NAMES_TO_ABBREVS = {
+    'delaware': 'de',
+    'new-hampshire': 'nh',
+}
 
 
 def home(request):
@@ -19,12 +20,13 @@ def home(request):
     return HttpResponse(template.render(request))
 
 
-def view_error(request, analysis_type, error_id):
+def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
 
     cache_findings()
     template = loader.get_template('view_error.html')
-    with open('website/static/findings.pickle', 'r') as infile:
+    local_path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
+    with open(local_path, 'r') as infile:
         error = pickle.load(infile)[int(error_id)]
     context = {
         'error_id': error_id,
@@ -42,7 +44,8 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
     cache_findings()
 
     template = loader.get_template('list_errors.html')
-    with open('website/static/findings.pickle', 'r') as infile:
+    local_path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
+    with open(local_path, 'r') as infile:
         errors = pickle.load(infile)
     context = {
         'country_abbrev': country_abbrev,
@@ -60,7 +63,15 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 
 def cache_findings():
     """Download findings from S3."""
-    if not os.path.exists('website/static/findings.pickle'):
-        s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-        s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
+    s3 = boto3.resource('s3')
+    deeposm_bucket = s3.Bucket('deeposm')
+    for obj in deeposm_bucket.objects.all():
+        print(obj.key)    
+        local_path = 'website/static/' + obj.key
+        if not os.path.exists(local_path):
+            s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+            s3_client.download_file('deeposm', 'findings.pickle', 'website/static/findings.pickle')
+            print("DOWNLOADED {}".format(obj.key))
+        else:
+            print("ALREADY DOWNLOADED {}".format(obj.key))

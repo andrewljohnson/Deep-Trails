@@ -40,7 +40,7 @@ def main():
     with open(CACHE_PATH + 'raster_data_paths.pickle', 'r') as infile:
         raster_data_paths = pickle.load(infile)
 
-    with open(CACHE_PATH + METADATA_FILEPATH, 'r') as infile:
+    with open(CACHE_PATH + METADATA_PATH, 'r') as infile:
         training_info = pickle.load(infile)
 
     test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, 
@@ -74,6 +74,7 @@ def main():
 
         # push pickle to S3
         s3_client = boto3.client('s3')
+        remote_path = training_info['naip_state'] + '/findings.pickle'
         s3_client.upload_file(CACHE_PATH + 'findings.pickle', 'deeposm', 'findings.pickle')
 
     if args.render_results:

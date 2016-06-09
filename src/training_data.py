@@ -184,7 +184,7 @@ def bounds_contains_point(bounds, point_tuple):
 
 
 def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_size,
-                               pixels_to_fatten_roads, label_data_files, tile_overlap):
+                               pixels_to_fatten_roads, label_data_files, tile_overlap, naip_state):
     """Return lists of training images and matching labels."""
     # tile images and labels
     waymap = download_and_extract(label_data_files, extract_type)
@@ -234,7 +234,7 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
             numpy.save(outfile, numpy.asarray(naip_tiles))
 
     # dump the metadata to disk for configuring the analysis script later
-    training_info = {'bands': band_list, 'tile_size': tile_size}
+    training_info = {'bands': band_list, 'tile_size': tile_size, 'naip_state': naip_state}
     with open(CACHE_PATH + METADATA_PATH, 'w') as outfile:
         pickle.dump(training_info, outfile)
 
