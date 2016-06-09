@@ -45,5 +45,5 @@ For Delaware:
 
 For Maine:
 
-    python bin/create_training_data.py --naip-path 'me' 2013 --label-data-files 'http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf' --number-of-naips=-1
+   python bin/create_training_data.py --naip-path 'me' 2013 --label-data-files 'http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf' --number-of-naips=175 --randomize-naips
     pythin bin/train_neural_net --neural-net one_layer_relu_conv 
