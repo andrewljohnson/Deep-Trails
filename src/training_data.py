@@ -27,6 +27,7 @@ METADATA_PATH = 'training_metadata.pickle'
 # the name of the S3 bucket to post findings to
 FINDINGS_S3_BUCKET = 'deeposm'
 
+
 def read_naip(file_path, bands_to_use):
     """
     Read in a NAIP, based on www.machinalis.com/blog/python-for-geospatial-data-processing.
