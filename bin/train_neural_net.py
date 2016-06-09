@@ -10,7 +10,7 @@ import pickle
 # in order to import PIL before TFLearn - or PIL errors tryig to save a JPEG
 from src.training_visualization import render_results_for_analysis
 from src.single_layer_network import train_on_cached_data, predictions_for_tiles, list_findings
-from src.training_data import CACHE_PATH, load_training_tiles, tag_with_locations
+from src.training_data import CACHE_PATH, METADATA_PATH, load_training_tiles, tag_with_locations
 
 
 def create_parser():
@@ -43,8 +43,9 @@ def main():
     with open(CACHE_PATH + METADATA_FILEPATH, 'r') as infile:
         training_info = pickle.load(infile)
 
-    test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, training_info['bands'],
-                                              training_info['tile_size'], args.number_of_epochs)
+    test_images, model = train_on_cached_data(raster_data_paths, args.neural_net, 
+                                              training_info['bands'], training_info['tile_size'], 
+                                              args.number_of_epochs)
     if not args.omit_findings:
         findings = []
         for path in raster_data_paths:
