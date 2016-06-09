@@ -13,7 +13,7 @@ FINDINGS_S3_BUCKET = 'deeposm'
 STATE_NAMES_TO_ABBREVS = {
     'delaware': 'de',
     'maine': 'me',
-    'new-hampshire': 'nh', #nh is unused
+    'new-hampshire': 'nh',  # nh is unused
 }
 
 
