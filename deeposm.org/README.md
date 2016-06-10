@@ -36,15 +36,14 @@ Then:
 
 ## Data Displayed
 
-The production findings are currently created and posted to S3 for by running these commands, using DeepOSM. It includes two US states now.
+The production findings are created and posted to S3 by running these commands, using DeepOSM. 
 
 For Delaware:
 
     python bin/create_training_data.py --number-of-naips=-1
-    pythin bin/train_neural_net --neural-net one_layer_relu_conv 
+    python bin/train_neural_net.py --number-of-epochs=4 --neural-net=one_layer_relu_conv --post-findings-to-s3
 
 For Maine:
 
-    python bin/create_training_data.py --number-of-naips=175 --naip-path 'me' 2013 --label-data-files  'http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf'
-    
-    python bin/train_neural_net --neural-net one_layer_relu_conv 
+    python bin/create_training_data.py --number-of-naips=175 --naip-path 'me' 2013 --label-data-files 'http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf'
+    python bin/train_neural_net.py --number-of-epochs=4 --neural-net=one_layer_relu_conv --post-findings-to-s3
