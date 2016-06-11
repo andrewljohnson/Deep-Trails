@@ -25,18 +25,14 @@ def home(request):
 
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
-    cache_findings()
-    template = loader.get_template('view_error.html')
-    errors = sorted_findings(state_name)
-    error = errors[int(error_id)]
+    error = models.MapError.objects.get(id=error_id)
     context = {
-        'error_id': error_id,
-        'center': ((error[4] + error[2]) / 2, (error[3] + error[1]) / 2),
+        'center': ((error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2),
         'error': error,
-        'json_error': json.dumps(error),
         'analysis_title': analysis_type.replace('-', ' ').title(),
         'analysis_type': analysis_type,
     }
+    template = loader.get_template('view_error.html')
     return HttpResponse(template.render(context, request))
 
 
@@ -61,7 +57,7 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 
 def sorted_findings(state_name):
     """Return a list of errors for the path, sorted by probability."""
-    return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name])
+    return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name]).order_by('-certainty')
 
 
 def cache_findings():
@@ -81,18 +77,22 @@ def cache_findings():
             with open(local_path, 'r') as infile:
                 errors = pickle.load(infile)
             for e in errors:
-                filename = e.raster_filename
-                map_error = models.MapError.objects.get_or_create(raster_filename=filename,
-                                                                  raster_tile_x=e.raster_tile_x,
-                                                                  raster_tile_y=e.raster_tile_y,
-                                                                  state_abbrev=e.state_abbrev
+                try:
+                    e['state_abbrev']
+                except:
+                    break
+                filename = e['raster_filename']
+                map_error = models.MapError.objects.get_or_create(raster_filename = filename,
+                                                                  raster_tile_x = e['raster_tile_x'],
+                                                                  raster_tile_y = e['raster_tile_y'],
+                                                                  state_abbrev = e['state_abbrev'],
+                                                                  ne_lat = e['ne_lat'],
+                                                                  ne_lon = e['ne_lon'],
+                                                                  sw_lat = e['sw_lat'],
+                                                                  sw_lon = e['sw_lon']
                                                                   )
-                map_error.certainty = e.certainty
-                map_error.ne_lat = e.ne_lat
-                map_error.ne_lon = e.ne_lon
-                map_error.sw_lat = e.sw_lat
-                map_error.sw_lon = e.sw_lon
-                map_error.save()
+                map_error[0].certainty = e['certainty']
+                map_error[0].save()
 
             print("DOWNLOADED {}".format(obj.key))
         else:

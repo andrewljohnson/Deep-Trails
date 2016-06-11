@@ -15,10 +15,7 @@ Then, the site is live at your docker IP, similar to: http://192.168.99.100:8000
 
 ## Running Migrations via Docker Compose
 
-[Per these docs](https://realpython.com/blog/python/django-development-with-docker-compose-and-machine/):
-
-    docker-compose run web /usr/local/bin/python manage.py migrate
-
+    docker-compose run web /usr/local/bin/python manage.py migrate  --run-syncdb
 
 ## Deploy to Amazon Elastic Beanstalk (EBS)
 
