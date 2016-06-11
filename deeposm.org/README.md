@@ -13,6 +13,13 @@ Start Docker Quickstart Terminal on a Mac. Then:
 
 Then, the site is live at your docker IP, similar to: http://192.168.99.100:8000/
 
+## Running Migrations via Docker Compose
+
+[Per these docs](https://realpython.com/blog/python/django-development-with-docker-compose-and-machine/):
+
+    docker-compose run web /usr/local/bin/python manage.py migrate
+
+
 ## Deploy to Amazon Elastic Beanstalk (EBS)
 
 Follow [this tutorial](https://realpython.com/blog/python/deploying-a-django-app-and-postgresql-to-aws-elastic-beanstalk/). It goes like:
@@ -33,6 +40,11 @@ Per tutorial, if you search for the terms ‘WSGI’ in the file, and you should
 Then:
 
     eb deploy
+
+Also, set your AWS credentials on EB:
+
+    eb setenv AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    eb setenv AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 
 ## Data Displayed
 

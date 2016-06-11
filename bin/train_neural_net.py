@@ -47,7 +47,8 @@ def main():
                                               args.number_of_epochs)
 
     if post_findings_to_s3:
-        post_findings_to_s3(raster_data_paths, model, training_info, args.render_results)
+        post_findings_to_s3(raster_data_paths, model, training_info, args.render_results,
+                            training_info['naip_state'])
 
 
 if __name__ == "__main__":

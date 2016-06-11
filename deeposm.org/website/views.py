@@ -4,10 +4,9 @@ from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import boto3
 import json
-import operator
 import os
 import pickle
-from website import settings
+from website import models, settings
 
 FINDINGS_S3_BUCKET = 'deeposm'
 
@@ -62,10 +61,7 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 
 def sorted_findings(state_name):
     """Return a list of errors for the path, sorted by probability."""
-    path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
-    with open(path, 'r') as infile:
-        errors = pickle.load(infile)
-    return errors
+    return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name])
 
 
 def cache_findings():
@@ -83,10 +79,20 @@ def cache_findings():
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
             s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
             with open(local_path, 'r') as infile:
-                errors = pickle.load(infile)[0:1000]
-            errors.sort(key=operator.itemgetter(0), reverse=True)
-            with open(local_path, 'w') as infile:
-                pickle.dump(errors, infile)
+                errors = pickle.load(infile)
+            for e in errors:
+                filename = e.raster_filename
+                map_error = models.MapError.objects.get_or_create(raster_filename=filename,
+                                                                  raster_tile_x=e.raster_tile_x,
+                                                                  raster_tile_y=e.raster_tile_y,
+                                                                  state_abbrev=e.state_abbrev
+                                                                  )
+                map_error.certainty = e.certainty
+                map_error.ne_lat = e.ne_lat
+                map_error.ne_lon = e.ne_lon
+                map_error.sw_lat = e.sw_lat
+                map_error.sw_lon = e.sw_lon
+                map_error.save()
 
             print("DOWNLOADED {}".format(obj.key))
         else:
