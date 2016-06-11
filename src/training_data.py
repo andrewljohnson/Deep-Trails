@@ -413,10 +413,10 @@ def tag_with_locations(test_images, predictions, tile_size, state_abbrev):
         raster_dataset = gdal.Open(os.path.join(NAIP_DATA_DIR, raster_filename), gdal.GA_ReadOnly)
         raster_tile_x = img_loc_tuple[1][0]
         raster_tile_y = img_loc_tuple[1][1]
-        ne_lat, ne_lon = pixel_to_lat_lon_web_mercator(raster_dataset, grid_x +
-                                                       tile_size, grid_y)
-        sw_lat, sw_lon = pixel_to_lat_lon_web_mercator(raster_dataset, grid_x,
-                                                       grid_y + tile_size)
+        ne_lat, ne_lon = pixel_to_lat_lon_web_mercator(raster_dataset, raster_tile_x +
+                                                       tile_size, raster_tile_y)
+        sw_lat, sw_lon = pixel_to_lat_lon_web_mercator(raster_dataset, raster_tile_x,
+                                                       raster_tile_y + tile_size)
         certainty = predictions[idx][0]
         formatted_info = {'certainty': certainty, 'ne_lat': ne_lat, 'ne_lon': ne_lon, 
                           'sw_lat': sw_lat, 'sw_lon': sw_lon, 'raster_tile_x': raster_tile_x, 
