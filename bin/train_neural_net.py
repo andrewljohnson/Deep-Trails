@@ -26,9 +26,6 @@ def create_parser():
     parser.add_argument("--render-results",
                         action='store_true',
                         help="output data/predictions to JPEG, in addition to normal JSON")
-    parser.add_argument("--post-findings-to-s3",
-                        action='store_true',
-                        help="post predicted errors JSON to an S3 bucket")
     return parser
 
 
@@ -46,10 +43,8 @@ def main():
                                               training_info['bands'], training_info['tile_size'],
                                               args.number_of_epochs)
 
-    if post_findings_to_s3:
-        post_findings_to_s3(raster_data_paths, model, training_info, args.render_results,
-                            training_info['naip_state'])
-
+    with open(CACHE_PATH + 'model.pickle', 'w') as outfile:
+        pickle.dump(mode, outfile)
 
 if __name__ == "__main__":
     main()
