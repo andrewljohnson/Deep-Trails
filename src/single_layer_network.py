@@ -158,7 +158,7 @@ def sort_findings(model, image_tuples, test_images, labels, false_positives, fp_
         if has_ways_in_center(label, 1) and p[0] > .5:
             false_positives.append(p)
             fp_images.append(image_tuples[pred_index])
-        #elif not has_ways_in_center(label, 16) and p[0] <= .5:
+        # elif not has_ways_in_center(label, 16) and p[0] <= .5:
         #    false_negatives.append(p)
         #    fn_images.append(image_tuples[pred_index])
         pred_index += 1
