@@ -4,17 +4,16 @@ from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import boto3
 import json
-import operator
 import os
 import pickle
-from website import settings
+import settings
 
 FINDINGS_S3_BUCKET = 'deeposm'
 
 STATE_NAMES_TO_ABBREVS = {
     'delaware': 'de',
     'maine': 'me',
-    'new-hampshire': 'nh',  # nh is unused
+    'new-hampshire': 'nh', #nh is unused
 }
 
 
@@ -26,13 +25,15 @@ def home(request):
 
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
+
     cache_findings()
     template = loader.get_template('view_error.html')
-    errors = sorted_findings(state_name)
-    error = errors[int(error_id)]
+    local_path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
+    with open(local_path, 'r') as infile:
+        error = pickle.load(infile)[int(error_id)]
     context = {
         'error_id': error_id,
-        'center': ((error[4] + error[2]) / 2, (error[3] + error[1]) / 2),
+        'center': ((error[4]+error[2])/2, (error[3]+error[1])/2),
         'error': error,
         'json_error': json.dumps(error),
         'analysis_title': analysis_type.replace('-', ' ').title(),
@@ -44,8 +45,11 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
 def list_errors(request, analysis_type, country_abbrev, state_name):
     """List all the errors of a given type in the country/state."""
     cache_findings()
+
     template = loader.get_template('list_errors.html')
-    errors = sorted_findings(state_name)
+    local_path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
+    with open(local_path, 'r') as infile:
+        errors = pickle.load(infile)
     context = {
         'country_abbrev': country_abbrev,
         'state_name': state_name,
@@ -58,14 +62,6 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
         return JsonResponse(context)
 
     return HttpResponse(template.render(context, request))
-
-
-def sorted_findings(state_name):
-    """Return a list of errors for the path, sorted by probability."""
-    path = 'website/static/' + STATE_NAMES_TO_ABBREVS[state_name] + '/findings.pickle'
-    with open(path, 'r') as infile:
-        errors = pickle.load(infile)
-    return errors
 
 
 def cache_findings():
@@ -82,12 +78,6 @@ def cache_findings():
             s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
             s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
-            with open(local_path, 'r') as infile:
-                errors = pickle.load(infile)[0:1000]
-            errors.sort(key=operator.itemgetter(0), reverse=True)
-            with open(local_path, 'w') as infile:
-                pickle.dump(errors, infile)
-
             print("DOWNLOADED {}".format(obj.key))
         else:
             print("ALREADY DOWNLOADED {}".format(obj.key))
