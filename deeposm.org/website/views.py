@@ -78,31 +78,17 @@ def cache_findings():
             with open(local_path, 'r') as infile:
                 errors = pickle.load(infile)
 
-            naip_errors = {}
+            naip_errors = naip_map_for_errors(errors)
+
             for e in errors:
-                try:
-                    e['state_abbrev']
-                except:
-                    break
                 filename = e['raster_filename']
-
-                if filename in naip_errors:
-                    # keep track of which errors dont exist for the import, to
-                    # mark as solved
-                    errors_for_naip = models.MapError.objects.filter(
-                        raster_filename=filename)
-                    error_ids = []
-                    for err in errors_for_naip:
-                        error_ids.append(err.id)
-                    naip_errors[filename] = error_ids
-
+                updated_error = False
                 try:
                     map_error = models.MapError.objects.get(raster_filename=filename,
                                                             raster_tile_x=e['raster_tile_x'],
                                                             raster_tile_y=e['raster_tile_y'],
                                                             )
-                    naip_errors[filename].remove(map_error.id)
-                    map_error.solved_date = None
+                    updated_error = True
                 except:
                     map_error = models.MapError(raster_filename=filename,
                                                 raster_tile_x=e['raster_tile_x'],
@@ -113,9 +99,14 @@ def cache_findings():
                                                 sw_lat=e['sw_lat'],
                                                 sw_lon=e['sw_lon']
                                                 )
+                if updated_error:
+                    naip_errors[filename].remove(map_error.id)
+                    map_error.solved_date = None
+
                 map_error.certainty = e['certainty']
                 map_error.save()
 
+            # set any finding that didn't re-occur as solved in DB
             for key in naip_errors:
                 fixed_errors = models.MapError.objects.filter(
                     id__in=naip_errors[key])
@@ -126,3 +117,20 @@ def cache_findings():
             print("DOWNLOADED {}".format(obj.key))
         else:
             print("ALREADY DOWNLOADED {}".format(obj.key))
+
+
+def naip_map_for_errors(errors):
+    """Return a map of NAIP filename to list of error_ids for that NAIP in the DB."""
+    naip_errors = {}
+    for e in errors:
+        filename = e['raster_filename']
+        if filename not in naip_errors:
+            # keep track of which errors dont exist for the import, to
+            # mark as solved
+            errors_for_naip = models.MapError.objects.filter(
+                raster_filename=filename)
+            error_ids = []
+            for err in errors_for_naip:
+                error_ids.append(err.id)
+            naip_errors[filename] = error_ids
+    return naip_errors
