@@ -70,23 +70,36 @@ def cache_findings():
             os.mkdir('website/static/' + obj.key.split('/')[0])
         except:
             pass
-        if not os.path.exists(local_path):
+        if True or not os.path.exists(local_path):
             s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
             s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
             with open(local_path, 'r') as infile:
                 errors = pickle.load(infile)
+            
+            naip_errors = {}
             for e in errors:
                 try:
                     e['state_abbrev']
                 except:
                     break
                 filename = e['raster_filename']
+                
+
+                if filename in naip_errors:
+                    # keep track of which errors dont exist for the import, to mark as solved
+                    errors_for_naip = models.MapError.objects.filter(raster_filename = filename)
+                    error_ids = []
+                    for err in errors_for_naip:
+                      error_ids.append(err.id)
+                    naip_errors[filename] = error_ids
+
                 try:
                     map_error = models.MapError.objects.get(raster_filename = filename,
                                                 raster_tile_x = e['raster_tile_x'],
                                                 raster_tile_y = e['raster_tile_y'],
                                                 )
+                    naip_errors[filename].remove(map_error.id)
                 except:
                     map_error = models.MapError(raster_filename = filename,
                                                     raster_tile_x = e['raster_tile_x'],
@@ -97,9 +110,11 @@ def cache_findings():
                                                     sw_lat = e['sw_lat'],
                                                     sw_lon = e['sw_lon']
                                                   )
-
                 map_error.certainty = e['certainty']
                 map_error.save()
+            
+            for key in naip_errors:                
+                models.MapError.objects.filter(id__in=naip_errors[key]).delete()
 
             print("DOWNLOADED {}".format(obj.key))
         else:
