@@ -82,17 +82,24 @@ def cache_findings():
                 except:
                     break
                 filename = e['raster_filename']
-                map_error = models.MapError.objects.get_or_create(raster_filename = filename,
-                                                                  raster_tile_x = e['raster_tile_x'],
-                                                                  raster_tile_y = e['raster_tile_y'],
-                                                                  state_abbrev = e['state_abbrev'],
-                                                                  ne_lat = e['ne_lat'],
-                                                                  ne_lon = e['ne_lon'],
-                                                                  sw_lat = e['sw_lat'],
-                                                                  sw_lon = e['sw_lon']
-                                                                  )
-                map_error[0].certainty = e['certainty']
-                map_error[0].save()
+                try:
+                    map_error = models.MapError.objects.get(raster_filename = filename,
+                                                raster_tile_x = e['raster_tile_x'],
+                                                raster_tile_y = e['raster_tile_y'],
+                                                )
+                except:
+                    map_error = models.MapError(raster_filename = filename,
+                                                    raster_tile_x = e['raster_tile_x'],
+                                                    raster_tile_y = e['raster_tile_y'],
+                                                    state_abbrev = e['state_abbrev'],
+                                                    ne_lat = e['ne_lat'],
+                                                    ne_lon = e['ne_lon'],
+                                                    sw_lat = e['sw_lat'],
+                                                    sw_lon = e['sw_lon']
+                                                  )
+
+                map_error.certainty = e['certainty']
+                map_error.save()
 
             print("DOWNLOADED {}".format(obj.key))
         else:
