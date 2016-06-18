@@ -3,6 +3,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import boto3
+import datetime
 import json
 import os
 import pickle
@@ -57,7 +58,7 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 
 def sorted_findings(state_name):
     """Return a list of errors for the path, sorted by probability."""
-    return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name]).order_by('-certainty')
+    return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name], solved_date=None).order_by('-certainty')
 
 
 def cache_findings():
@@ -100,21 +101,25 @@ def cache_findings():
                                                 raster_tile_y = e['raster_tile_y'],
                                                 )
                     naip_errors[filename].remove(map_error.id)
+                    map_error.solved_date = None
                 except:
                     map_error = models.MapError(raster_filename = filename,
-                                                    raster_tile_x = e['raster_tile_x'],
-                                                    raster_tile_y = e['raster_tile_y'],
-                                                    state_abbrev = e['state_abbrev'],
-                                                    ne_lat = e['ne_lat'],
-                                                    ne_lon = e['ne_lon'],
-                                                    sw_lat = e['sw_lat'],
-                                                    sw_lon = e['sw_lon']
-                                                  )
+                                                raster_tile_x = e['raster_tile_x'],
+                                                raster_tile_y = e['raster_tile_y'],
+                                                state_abbrev = e['state_abbrev'],
+                                                ne_lat = e['ne_lat'],
+                                                ne_lon = e['ne_lon'],
+                                                sw_lat = e['sw_lat'],
+                                                sw_lon = e['sw_lon']
+                                               )
                 map_error.certainty = e['certainty']
                 map_error.save()
             
             for key in naip_errors:                
-                models.MapError.objects.filter(id__in=naip_errors[key]).delete()
+                fixed_errors = models.MapError.objects.filter(id__in=naip_errors[key])
+                for f in fixed_errors:
+                    f.solved_date = datetime.date.utcnow()
+                    f.save()
 
             print("DOWNLOADED {}".format(obj.key))
         else:
