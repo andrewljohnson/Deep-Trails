@@ -5,6 +5,7 @@ from django.template import loader
 import boto3
 import datetime
 import json
+import operator
 import os
 import pickle
 from website import models, settings
@@ -59,6 +60,9 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
 def sorted_findings(state_name):
     """Return a list of errors for the path, sorted by probability."""
     return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name], solved_date=None).order_by('-certainty')
+    with open(path, 'r') as infile:
+        errors = pickle.load(infile)
+    return errors
 
 
 def cache_findings():
