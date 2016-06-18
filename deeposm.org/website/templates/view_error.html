@@ -23,11 +23,14 @@
                     Likely Error {% widthratio error.certainty 1 85 %}%
               </td>
               <td>
-                 <a style="color:red" target=_new href=https://www.openstreetmap.org/edit#map=18/{{center.0}}/{{center.1}}
+                 <a class="btn btn-success" target=_new href=https://www.openstreetmap.org/edit#map=18/{{center.0}}/{{center.1}}
 >Fix on OpenStreetMap.org</a>
               </td>
               <td>
-                 <a target=_new href=/flag/{{ error.id }}/>Flag Bad Predicton</a>
+                 <form method="POST" action="/{{ analysis_type }}/{{ country_abbrev }}/{{ state_name }}/view/{{ error.id }}/" style="margin:0">
+                     {% csrf_token %}
+                     <input class="btn btn-danger" type="submit" value="Flag Bad Predicton ({{error.flagged_count}})"></input>
+                  </form>
               </td>
           </tr>
         </table>

@@ -26,9 +26,15 @@ def home(request):
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
     error = models.MapError.objects.get(id=error_id)
+    if request.POST:
+        error.flagged_count += 1
+        error.save()
+
     context = {
         'center': ((error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2),
         'error': error,
+        'country_abbrev': country_abbrev,
+        'state_name': state_name,
         'analysis_title': analysis_type.replace('-', ' ').title(),
         'analysis_type': analysis_type,
     }
@@ -40,25 +46,38 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
     """List all the errors of a given type in the country/state."""
     cache_findings()
     template = loader.get_template('list_errors.html')
-    errors = sorted_findings(state_name)
+    analysis_title = analysis_type.replace('-', ' ').title()
+    if request.GET.get('flagged'):
+        analysis_title = 'Flagged ' + analysis_title
+        errors = sorted_findings(state_name, flagged_count=1)
+    else:
+        errors = sorted_findings(state_name)
+
     context = {
         'country_abbrev': country_abbrev,
         'state_name': state_name,
         'analysis_type': analysis_type,
-        'analysis_title': analysis_type.replace('-', ' ').title(),
+        'analysis_title': analysis_title,
         'errors': errors,
     }
 
     if request.GET.get("json"):
+        json_errors = []
+        for e in errors:
+            json_errors.append({'id': e.id,
+                                'certainty': e.certainty,
+                                'center': ((e.ne_lon + e.sw_lon) / 2, (e.ne_lat + e.sw_lat) / 2)})
+        context['errors'] = json_errors
         return JsonResponse(context)
 
     return HttpResponse(template.render(context, request))
 
 
-def sorted_findings(state_name):
+def sorted_findings(state_name, flagged_count=0):
     """Return a list of errors for the path, sorted by probability."""
     return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name],
-                                          solved_date=None).order_by('-certainty')
+                                          solved_date=None,
+                                          flagged_count__gte=flagged_count).order_by('-certainty')
 
 
 def cache_findings():
