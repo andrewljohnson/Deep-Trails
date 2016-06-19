@@ -10,7 +10,7 @@
             Improve OpenStreetMap with Neural Networks
         </h1>
         {% for state in states %}
-        <a class="btn btn-lg btn-primary" href="/road-registration-errors/USA/{{state.slug}}/list/" role="button">View {{state.name}} Errors</a>
+        <a class="btn btn-lg btn-primary" style="text-decoration:none" href="/road-registration-errors/USA/{{state.slug}}/list/" role="button">View {{state.name}} Errors</a>
 	    {% endfor %}
     </div>
 
@@ -18,7 +18,7 @@
 	<p>Browse errors found by DeepOSM, and pop to iD editor on openstreetmap.org to correct.</p>
 	<ul>
 	    {% for state in states %}
-	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/>{{state.name}}, USA - Road Registration Errors ({{state.recent}})</a> - (<a style="color:orange" href=/road-registration-errors/USA/{{state.slug}}/list/?json=True target=_new>as JSON</a>)</li>
+	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/>{{state.name}}, USA - Road Registration Errors ({{state.recent}})</a> - (<a style="color:green" href="/road-registration-errors/USA/{{state.slug}}/list/?json=True" target=_new>as JSON</a>)</li>
 	    {% endfor %}
 	</ul>
 
@@ -26,17 +26,19 @@
 	<p>Browse errors users have flagged as bad (not actually an error).</p>
 	<ul>
 	    {% for state in states %}
-	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/?flagged=True>{{state.name}}, USA - Road Registration Errors ({{state.flagged}})</a> - (<a style="color:orange" href=/road-registration-errors/USA/{{state.slug}}/list/?flagged=True&json=True target=_new>as JSON</a>)</li>
+	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/?flagged=True>{{state.name}}, USA - Road Registration Errors ({{state.flagged}})</a> - (<a style="color:green" href="/road-registration-errors/USA/{{state.slug}}/list/?flagged=True&json=True" target=_new>as JSON</a>)</li>
 	    {% endfor %}
 	</ul>
 
+    {% if any_solved %}
     <h3>Solved</h3>
 	<p>Errors detected by DeepOSM that seem fixed.</p>
 	<ul>
 	    {% for state in states %}
-	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/?solved=True>{{state.name}}, USA - Road Registration Errors ({{state.solved}})</a> - (<a style="color:orange" href=/road-registration-errors/USA/{{state.slug}}/list/?solved=True&json=True target=_new>as JSON</a>)</li>
+	    <li><a href=/road-registration-errors/USA/{{state.slug}}/list/?solved=True>{{state.name}}, USA - Road Registration Errors ({{state.solved}})</a> - (<a style="color:orange" href="/road-registration-errors/USA/{{state.slug}}/list/?solved=True&json=True" target=_new>as JSON</a>)</li>
 	    {% endfor %}
 	</ul>
+	{% endif %}
 
 	<h3>DeepOSM Code</h3>
 	Check out the <a target=_new href=https://github.com/trailbehind/DeepOSM>code for DeepOSM and deeposm.org</a>.

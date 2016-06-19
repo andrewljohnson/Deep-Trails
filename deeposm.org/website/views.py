@@ -6,6 +6,7 @@ import boto3
 import datetime
 import os
 import pickle
+import requests
 from website import models, settings
 
 FINDINGS_S3_BUCKET = 'deeposm'
@@ -22,6 +23,7 @@ def home(request):
     all_errors = models.MapError.objects.all()
     ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.iteritems())
     state_map = {}
+    any_solved = False
     for e in all_errors:
         if e.state_abbrev not in state_map:
             title = ABRREVS_TO_NAMES[e.state_abbrev].replace('-', ' ').title()
@@ -32,6 +34,7 @@ def home(request):
                                          }
         if e.solved_date:
             state_map[e.state_abbrev]['solved'] += 1
+            any_solved = True
         elif e.flagged_count > 0:
             state_map[e.state_abbrev]['flagged'] += 1
         else:
@@ -41,23 +44,47 @@ def home(request):
     states = []
     for key in sorted(state_map.keys()):
         states.append(state_map[key])
-    return HttpResponse(template.render({'states': states}, request))
+    return HttpResponse(template.render({'states': states, 'any_solved': any_solved}, request))
 
 
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
     error = models.MapError.objects.get(id=error_id)
     if request.POST:
-        error.flagged_count += 1
-        error.save()
+        if request.GET.get('flag_error'):
+            error.flagged_count += 1
+            error.save()
+        elif request.GET.get('post_to_maproulette'):
+            error = models.MapError.objects.get(id=error_id)
+            lon, lat = (error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2
+            api_key = "Hmw3xyqurgiD1l2BIp9yYob8ajLiKeQW2YDwXa2D/YwdtmeKWvWsT94zm5kYMaF531ub3iMdww=="
+            instructions = "DeepOSM detected a mis-registered road. Align the road."
+            challenge_info = {'key': api_key,
+                              'instruction': instructions,
+                              'geometries': {
+                                              'type': 'FeatureCollection',
+                                              'features': [{'type': "Feature",
+                                                            'geometry': {'type': 'Point',
+                                                                         'coordinates': [lon, lat]
+                                                                         }
+                                                            }]
+                                            }
+                              }
+            slug = 'deeposm-{}'.format(error_id)
+            maproulette_api_url = 'http://maproulette.org//api/admin/challenge/{}'.format(slug)
+            response = requests.post(maproulette_api_url, json=challenge_info)
+            print(challenge_info)
+            print(response)
+            print(response.text)
 
     context = {
         'center': ((error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2),
         'error': error,
         'country_abbrev': country_abbrev,
+        'state_title': state_name.replace('-', ' ').title(),
         'state_name': state_name,
         'analysis_title': analysis_type.replace('-', ' ').title(),
-        'analysis_type': analysis_type,
+        'analysis_type': analysis_type
     }
     template = loader.get_template('view_error.html')
     return HttpResponse(template.render(context, request))
@@ -101,7 +128,7 @@ def sorted_findings(state_name, flagged_count=0, open_bug=True):
     """Return a list of errors for the path, sorted by probability."""
     return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name],
                                           solved_date__isnull=open_bug,
-                                          flagged_count__gte=flagged_count).order_by('-certainty')
+                                          flagged_count__lte=flagged_count).order_by('-certainty')
 
 
 def cache_findings():

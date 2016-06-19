@@ -1,4 +1,5 @@
 boto3
 Django
-psycopg2
 numpy
+psycopg2
+requests
