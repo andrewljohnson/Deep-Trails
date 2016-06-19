@@ -19,8 +19,26 @@ STATE_NAMES_TO_ABBREVS = {
 
 def home(request):
     """The home page for deeposm.org."""
+    all_errors = models.MapError.objects.all()
+    ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.iteritems())
+    state_map = {}
+    for e in all_errors:
+        if e.state_abbrev not in state_map:
+            state_map[e.state_abbrev] = {'recent': 0, 'flagged': 0, 'solved': 0,
+                                         'name': ABRREVS_TO_NAMES[e.state_abbrev].replace('-', ' ').title(),
+                                         'country_abbrev': 'USA'}
+        if e.solved_date:
+            state_map[e.state_abbrev]['solved'] += 1
+        elif e.flagged_count > 0:
+            state_map[e.state_abbrev]['flagged'] += 1
+        else:
+            state_map[e.state_abbrev]['recent'] += 1
+
     template = loader.get_template('home.html')
-    return HttpResponse(template.render(request))
+    states = []
+    for key in sorted(state_map.keys()):
+        states.append(state_map[key])
+    return HttpResponse(template.render({'states': states}, request))
 
 
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
@@ -113,6 +131,7 @@ def cache_findings():
                                                 raster_tile_x=e['raster_tile_x'],
                                                 raster_tile_y=e['raster_tile_y'],
                                                 state_abbrev=e['state_abbrev'],
+                                                country_abbrev='USA',
                                                 ne_lat=e['ne_lat'],
                                                 ne_lon=e['ne_lon'],
                                                 sw_lat=e['sw_lat'],
