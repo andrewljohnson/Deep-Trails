@@ -24,9 +24,12 @@ def home(request):
     state_map = {}
     for e in all_errors:
         if e.state_abbrev not in state_map:
+            title = ABRREVS_TO_NAMES[e.state_abbrev].replace('-', ' ').title()
             state_map[e.state_abbrev] = {'recent': 0, 'flagged': 0, 'solved': 0,
-                                         'name': ABRREVS_TO_NAMES[e.state_abbrev].replace('-', ' ').title(),
-                                         'country_abbrev': 'USA'}
+                                         'name': title,
+                                         'slug': ABRREVS_TO_NAMES[e.state_abbrev],
+                                         'country_abbrev': 'USA'
+                                         }
         if e.solved_date:
             state_map[e.state_abbrev]['solved'] += 1
         elif e.flagged_count > 0:
@@ -68,6 +71,9 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
     if request.GET.get('flagged'):
         analysis_title = 'Flagged ' + analysis_title
         errors = sorted_findings(state_name, flagged_count=1)
+    elif request.GET.get('solved'):
+        analysis_title = 'Solved ' + analysis_title
+        errors = sorted_findings(state_name, open_bug=False)
     else:
         errors = sorted_findings(state_name)
 
@@ -91,10 +97,10 @@ def list_errors(request, analysis_type, country_abbrev, state_name):
     return HttpResponse(template.render(context, request))
 
 
-def sorted_findings(state_name, flagged_count=0):
+def sorted_findings(state_name, flagged_count=0, open_bug=True):
     """Return a list of errors for the path, sorted by probability."""
     return models.MapError.objects.filter(state_abbrev=STATE_NAMES_TO_ABBREVS[state_name],
-                                          solved_date=None,
+                                          solved_date__isnull=open_bug,
                                           flagged_count__gte=flagged_count).order_by('-certainty')
 
 
