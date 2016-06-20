@@ -87,6 +87,8 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
+    STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+    STATIC_URL = '/static/'
 else:
     # locally using docker compose
     DATABASES = {
@@ -98,6 +100,8 @@ else:
             'PORT': 5432,
         }
     }
+    STATIC_URL = '/static/'
+    STATIC_ROOT = 'static'
 
 
 # Password validation
@@ -131,13 +135,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = 'static'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "website/static"),

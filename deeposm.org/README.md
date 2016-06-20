@@ -17,6 +17,47 @@ Then, the site is live at your docker IP, similar to: http://192.168.99.100:8000
 
     docker-compose run web /usr/local/bin/python manage.py migrate  --run-syncdb
 
+## Server Setup
+
+Started with this cookiecutter: https://github.com/dolphinkiss/cookiecutter-django-aws-eb
+
+    cookiecutter https://github.com/dolphinkiss/cookiecutter-django-aws-eb
+
+Chose this config:
+
+    aws_eb_type [python/docker]: docker
+    project_name [myproject]: error_browser
+    django_version [1.9.1]: 
+    setup_local_env [yes]: 
+    virtualenv_bin [virtualenv]: 
+    source_root [.]: error_browser
+
+Chose these settings for eb init:
+
+    eb init
+
+	Select a default region
+	3) us-west-2 : US West (Oregon)
+
+	Select an application to use
+	3) [ Create new Application ]
+
+	Enter Application Name: error_browser
+
+	It appears you are using Docker. Is this correct?
+	(y/n): y
+
+	Select a platform version.
+	1) Docker 1.9.1
+
+	Do you want to set up SSH for your instances?
+	(y/n): y
+
+	Select a keypair.
+	1) deeposm-andrew
+	(default is 2): 1
+
+
 ## Creating Production Findings
 
 The production findings are created and posted to S3 by running these commands, using DeepOSM. 

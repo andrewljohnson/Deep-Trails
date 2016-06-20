@@ -8,6 +8,8 @@ import os
 import pickle
 import requests
 from website import models, settings
+from requests_oauthlib import OAuth1
+
 
 FINDINGS_S3_BUCKET = 'deeposm'
 
@@ -57,10 +59,9 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
         elif request.GET.get('post_to_maproulette'):
             error = models.MapError.objects.get(id=error_id)
             lon, lat = (error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2
-            api_key = "Hmw3xyqurgiD1l2BIp9yYob8ajLiKeQW2YDwXa2D/YwdtmeKWvWsT94zm5kYMaF531ub3iMdww=="
+            key = "2-aEE4Mt5+0b/s2jevPT5CjdBAULJG1sAFZJQMLmh0G2L820gkiTm8RjIRgx3kv8fvBShD74wxgg=="
             instructions = "DeepOSM detected a mis-registered road. Align the road."
-            challenge_info = {'key': api_key,
-                              'instruction': instructions,
+            challenge_info = {'instruction': instructions,
                               'geometries': {
                                               'type': 'FeatureCollection',
                                               'features': [{'type': "Feature",
@@ -70,10 +71,17 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
                                                             }]
                                             }
                               }
-            slug = 'deeposm-{}'.format(error_id)
-            maproulette_api_url = 'http://maproulette.org//api/admin/challenge/{}'.format(slug)
-            response = requests.post(maproulette_api_url, json=challenge_info)
             print(challenge_info)
+            slug = 'deeposm-{}'.format(error_id)
+
+            maproulette_api_url = 'http://maproulette.org:8080/api/v2/project'
+            project = {
+                       "name": slug,
+                       "description": "Errors from DeepOSM."
+                       }
+
+            auth = OAuth1(key)
+            response = requests.post(maproulette_api_url, json=project, auth=auth)
             print(response)
             print(response.text)
 
