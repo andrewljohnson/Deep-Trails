@@ -118,7 +118,7 @@ else:
 
 AWS_STORAGE_BUCKET_NAME = 'deeposm-static'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3-us-west-2.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-STATIC_URL = "s3:///%s/" % AWS_S3_CUSTOM_DOMAIN
+STATIC_URL = "s3://%s/" % AWS_S3_CUSTOM_DOMAIN
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 # Password validation
