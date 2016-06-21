@@ -1,7 +1,9 @@
-boto
+boto3
 Django
 numpy
 psycopg2
 requests
 requests_oauthlib
-django-storages
+
+# boto3 compatible django storage
+django-storages-redux
