@@ -4,4 +4,4 @@ numpy
 psycopg2
 requests
 requests_oauthlib
-django-storages
+django-storages-redux
