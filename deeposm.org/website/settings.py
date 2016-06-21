@@ -87,7 +87,7 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-    STATIC_ROOT = os.path.join(BASE_DIR, "..", "static")
+    STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
     STATIC_URL = '/static/'
 else:
     # locally using docker compose
@@ -102,9 +102,6 @@ else:
     }
     STATIC_URL = '/static/'
     STATIC_ROOT = 'static'
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, "website/static"),
-    ]
 
 
 # Password validation
@@ -138,6 +135,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "website/static"),
+]
 
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', False)
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', False)
