@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
     'website'
 ]
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -88,7 +90,19 @@ if 'RDS_DB_NAME' in os.environ:
         }
     }
     STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
-    STATIC_URL = '/static/'
+    # STATIC_URL = '/static/'
+
+    # tell boto that when it uploads files to S3, it should set properties on them so that when S3
+    # serves them, it'll include those HTTP headers in the response
+    AWS_HEADERS = {  # see http://developer.yahoo.com/performance/rules.html#expires
+            'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+            'Cache-Control': 'max-age=94608000',
+    }
+    AWS_STORAGE_BUCKET_NAME = 'deeposm'
+    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+    STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
 else:
     # locally using docker compose
     DATABASES = {
