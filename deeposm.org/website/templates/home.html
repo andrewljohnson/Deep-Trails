@@ -3,6 +3,8 @@
 
 {% extends 'base.html' %}
 
+{% load staticfiles %}
+
 {% block content %}
     
     <div id=main-banner>
@@ -53,7 +55,7 @@
 
 		#main-banner ::before {
 		  content: "";
-		  background: url('/static/satellite-banner.jpg');
+		  background: url('{% static 'satellite-banner.jpg' %}');
 		  opacity: 0.3;
 		  top: 0;
 		  left: 0;
