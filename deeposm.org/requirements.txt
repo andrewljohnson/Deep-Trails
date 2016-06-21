@@ -1,4 +1,4 @@
-boto3
+boto
 Django
 numpy
 psycopg2
