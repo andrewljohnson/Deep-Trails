@@ -4,6 +4,4 @@ numpy
 psycopg2
 requests
 requests_oauthlib
-
-# boto3 compatible django storage
-django-storages-redux
+django-storages
