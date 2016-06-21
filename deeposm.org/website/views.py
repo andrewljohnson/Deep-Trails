@@ -23,7 +23,7 @@ STATE_NAMES_TO_ABBREVS = {
 def home(request):
     """The home page for deeposm.org."""
     all_errors = models.MapError.objects.all()
-    ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.iteritems())
+    ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.items())
     state_map = {}
     any_solved = False
     for e in all_errors:
