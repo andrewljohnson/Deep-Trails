@@ -172,7 +172,7 @@ def cache_findings():
                                                 raster_tile_x=e['raster_tile_x'],
                                                 raster_tile_y=e['raster_tile_y'],
                                                 state_abbrev=e['state_abbrev'],
-                                                #country_abbrev='USA',
+                                                # country_abbrev='USA',
                                                 ne_lat=e['ne_lat'],
                                                 ne_lon=e['ne_lon'],
                                                 sw_lat=e['sw_lat'],
