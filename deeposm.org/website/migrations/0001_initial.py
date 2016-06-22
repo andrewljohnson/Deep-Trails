@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MapError',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False,
+                                        verbose_name='ID')),
                 ('created_date', models.DateTimeField(auto_now_add=True)),
                 ('solved_date', models.DateTimeField(blank=True, null=True)),
                 ('ne_lat', models.FloatField()),
