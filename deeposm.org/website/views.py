@@ -153,7 +153,7 @@ def cache_findings():
             s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
             s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
-            with open(local_path, 'r') as infile:
+            with open(local_path, 'rb') as infile:
                 errors = pickle.load(infile)
 
             naip_errors = naip_map_for_errors(errors)
