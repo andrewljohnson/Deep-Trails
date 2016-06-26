@@ -22,6 +22,7 @@ STATE_NAMES_TO_ABBREVS = {
 
 def home(request):
     """The home page for deeposm.org."""
+    cache_findings()
     all_errors = models.MapError.objects.all()
     ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.items())
     state_map = {}
@@ -49,6 +50,23 @@ def home(request):
     return HttpResponse(template.render({'states': states, 'any_solved': any_solved}, request))
 
 
+# http://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
+def pretty_print_POST(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
+
+    However pay attention at the formatting used in 
+    this function because it is programmed to be pretty 
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
+
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
     error = models.MapError.objects.get(id=error_id)
@@ -57,11 +75,40 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
             error.flagged_count += 1
             error.save()
         elif request.GET.get('post_to_maproulette'):
+            key = "2-aEE4Mt5+0b/s2jevPT5CjdBAULJG1sAFZJQMLmh0G2L820gkiTm8RjIRgx3kv8fvBShD74wxgg=="
+            title = state_name.title() + ' Alignment Errors'
+            description = 'Fix misaligned ways in ' + state_name 
+            help_prompt = 'Remove or shift ways that seem awful in the scene.'
+            instruction = "Look at the map for oddly placed pieces of way. Go into you editor and repair them as needed"
+            list_challenges_url = 'http://maproulette.org:8080/api/v2/challenges'
+            
+            response = requests.get(list_challenges_url, json={"project": 57, "name": title}, headers={'apiKey':key})
+            challenge_id = None
+            for c in response.json():
+                print(c['name']) 
+                if c['name'] == title:
+                    challenge_id = c['id']
+
+            if not challenge_id:
+                project = {
+                           "project": 57,
+                           "name": title,
+                           "description": description,
+                           "help": help_prompt,
+                           "instruction": instruction,
+                           "active": True,
+                           "difficulty": 2
+                           }
+                create_challenge_url = 'http://maproulette.org:8080/api/v2/challenge'
+                response = requests.post(create_challenge_url, json=project, headers={'apiKey':key})
+                challenge_id = response.json()['id']
+
             error = models.MapError.objects.get(id=error_id)
             lon, lat = (error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2
-            key = "2-aEE4Mt5+0b/s2jevPT5CjdBAULJG1sAFZJQMLmh0G2L820gkiTm8RjIRgx3kv8fvBShD74wxgg=="
             instructions = "DeepOSM detected a mis-registered road. Align the road."
-            challenge_info = {'instruction': instructions,
+            challenge_info = {'challenge': challenge_id,
+                              'apiKey': key,
+                              'instruction': instructions,
                               'geometries': {
                                               'type': 'FeatureCollection',
                                               'features': [{'type': "Feature",
@@ -71,19 +118,9 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
                                                             }]
                                             }
                               }
-            print(challenge_info)
-            slug = 'deeposm-{}'.format(error_id)
-
-            maproulette_api_url = 'http://maproulette.org:8080/api/v2/project'
-            project = {
-                       "name": slug,
-                       "description": "Errors from DeepOSM."
-                       }
-
-            auth = OAuth1(key)
-            response = requests.post(maproulette_api_url, json=project, auth=auth)
-            print(response)
-            print(response.text)
+            slug = 'deeposm{}'.format(error_id)
+            response = requests.post(maproulette_api_url, json=project, headers={'apiKey':key})
+            pretty_print_POST(response.request)
 
     context = {
         'center': ((error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2),
