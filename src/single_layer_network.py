@@ -109,6 +109,10 @@ def model_for_type(neural_net_type, tile_size, on_band_count):
     elif neural_net_type == 'one_layer_relu_conv':
         network = conv_2d(network, 256, 16, activation='relu')
         network = max_pool_2d(network, 3)
+    elif neural_net_type == 'two_layer_relu_conv':
+        network = conv_2d(network, 256, 16, activation='relu')
+        network = max_pool_2d(network, 3)
+        network = conv_2d(network, 256, 16, activation='relu')
     else:
         print("ERROR: exiting, unknown layer type for neural net")
 
