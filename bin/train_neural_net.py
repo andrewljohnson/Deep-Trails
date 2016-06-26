@@ -43,7 +43,7 @@ def main():
                                               args.number_of_epochs)
 
     
-    save_model(model, args.neural_net, args.bands, training_info['bands'], training_info['tile_size'])
+    save_model(model, args.neural_net, training_info['bands'], training_info['tile_size'])
 
 if __name__ == "__main__":
     main()
