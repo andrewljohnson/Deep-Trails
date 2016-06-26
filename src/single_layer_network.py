@@ -3,6 +3,7 @@ from __future__ import division, print_function, absolute_import
 
 import numpy
 import pickle
+import random
 import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
@@ -24,6 +25,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
     onehot_test_labels = []
     model = None
 
+    random.shuffle(raster_data_paths)
     for path in raster_data_paths:
         # read in another NAIP worth of data
         labels, images = load_training_tiles(path)
@@ -47,7 +49,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
         [onehot_test_labels.append(l) for l in format_as_onehot_arrays(new_test_labels)]
 
         # once we have 100 test_images, maybe from more than one NAIP, train on a mini batch
-        if len(training_images) >= 100:
+        if len(training_images) >= 500:
             # continue training the model with the new data set
             model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
                                     training_images, neural_net_type, bands, tile_size,
@@ -105,14 +107,14 @@ def model_for_type(neural_net_type, tile_size, on_band_count):
     '''Type can be one_layer_relu or one_layer_relu_conv.'''
     network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
     if neural_net_type == 'one_layer_relu':
-        network = tflearn.fully_connected(network, 32, activation='relu')
+        network = tflearn.fully_connected(network, 64, activation='relu')
     elif neural_net_type == 'one_layer_relu_conv':
-        network = conv_2d(network, 256, 16, activation='relu')
+        network = conv_2d(network, 64, 12, strides=4, activation='relu')
         network = max_pool_2d(network, 3)
     elif neural_net_type == 'two_layer_relu_conv':
-        network = conv_2d(network, 256, 16, activation='relu')
+        network = conv_2d(network, 64, 12, strides=4, activation='relu')
         network = max_pool_2d(network, 3)
-        network = conv_2d(network, 256, 16, activation='relu')
+        network = conv_2d(network, 128, 4, activation='relu')
     else:
         print("ERROR: exiting, unknown layer type for neural net")
 
