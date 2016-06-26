@@ -403,8 +403,9 @@ def load_training_tiles(number_of_tiles):
     t0 = time.time()
     training_label_paths = []
     labels_path = "{}{}".format(CACHE_PATH, LABEL_CACHE_DIRECTORY)
+    all_paths = os.listdir(labels_path)
     for x in range(0, number_of_tiles):
-        label_path = random.choice(os.listdir(labels_path))
+        label_path = random.choice(all_paths)
         training_label_paths.append(label_path)
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_label_paths

@@ -23,16 +23,16 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
     onehot_training_labels = []
     model = None
     NUMBER_OF_BATCHES = 100
-    BATCH_SIZE = 100
+    BATCH_SIZE = 10000
 
     for x in range (0, NUMBER_OF_BATCHES):
-        # read in another NAIP worth of data
         new_label_paths = load_training_tiles(BATCH_SIZE)
         print("Got batch of {} labels".format(len(new_label_paths)))
         new_training_images, new_onehot_training_labels = format_as_onehot_arrays(new_label_paths)
         equal_count_way_list, equal_count_tile_list = equalize_data(new_onehot_training_labels, new_training_images, False)
         [training_images.append(i) for i in equal_count_tile_list]
         [onehot_training_labels.append(l) for l in equal_count_way_list]
+        
         # once we have 100 test_images, maybe from more than one NAIP, train on a mini batch
         if len(training_images) >= 100:
             # continue training the model with the new data set
@@ -51,16 +51,11 @@ def train_with_data(onehot_training_labels, training_images,
                     neural_net_type, band_list, tile_size, number_of_epochs, model):
     """Package data for tensorflow and analyze."""
     npy_training_labels = numpy.asarray(onehot_training_labels)
-    npy_test_labels = numpy.asarray(onehot_test_labels)
 
     # normalize 0-255 values to 0-1
     norm_training_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in training_images])
     norm_train_images = norm_training_images.astype(numpy.float32)
     norm_train_images = numpy.multiply(norm_train_images, 1.0 / 255.0)
-
-    norm_test_images = numpy.array([img_loc_tuple[0] for img_loc_tuple in test_images])
-    norm_test_images = norm_test_images.astype(numpy.float32)
-    norm_test_images = numpy.multiply(norm_test_images, 1.0 / 255.0)
 
     if not model:
         on_band_count = 0
