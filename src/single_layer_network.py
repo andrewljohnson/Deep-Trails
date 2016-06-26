@@ -21,48 +21,33 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
     """
     training_images = []
     onehot_training_labels = []
-    test_images = []
-    onehot_test_labels = []
     model = None
-
     NUMBER_OF_BATCHES = 100
     BATCH_SIZE = 100
 
     for x in range (0, NUMBER_OF_BATCHES):
         # read in another NAIP worth of data
-        labels, images = load_training_tiles(BATCH_SIZE)
-        equal_count_way_list, equal_count_tile_list = equalize_data(labels, images, False)
-        new_test_labels, training_labels, new_test_images, new_training_images = \
-            split_train_test(equal_count_tile_list, equal_count_way_list, .9)
-
-        # add it to the training and test lists
-        [training_images.append(i) for i in new_training_images]
-        [test_images.append(i) for i in new_test_images]
-        [onehot_training_labels.append(l) for l in format_as_onehot_arrays(training_labels)]
-        [onehot_test_labels.append(l) for l in format_as_onehot_arrays(new_test_labels)]
-
+        new_label_paths = load_training_tiles(BATCH_SIZE)
+        print("Got batch of {} labels".format(len(new_label_paths)))
+        new_training_images, new_onehot_training_labels = format_as_onehot_arrays(new_label_paths)
+        equal_count_way_list, equal_count_tile_list = equalize_data(new_onehot_training_labels, new_training_images, False)
+        [training_images.append(i) for i in equal_count_tile_list]
+        [onehot_training_labels.append(l) for l in equal_count_way_list]
         # once we have 100 test_images, maybe from more than one NAIP, train on a mini batch
         if len(training_images) >= 100:
             # continue training the model with the new data set
-            model = train_with_data(onehot_training_labels, onehot_test_labels, test_images,
+            model = train_with_data(onehot_training_labels, 
                                     training_images, neural_net_type, bands, tile_size,
                                     number_of_epochs, model)
             training_images = []
             onehot_training_labels = []
-
-        # keep test list to 10000 images, in case the machine doesn't have much memory
-        if len(test_images) > 10000:
-            # shuffle so when we chop off data, it's from many NAIPs, not just the last one
-            shuffle_in_unison(test_images, onehot_test_labels)
-            test_images = test_images[:9000]
-            onehot_test_labels = onehot_test_labels[:9000]
 
     save_model(model, neural_net_type, bands, tile_size)
 
     return test_images, model
 
 
-def train_with_data(onehot_training_labels, onehot_test_labels, test_images, training_images,
+def train_with_data(onehot_training_labels, training_images,
                     neural_net_type, band_list, tile_size, number_of_epochs, model):
     """Package data for tensorflow and analyze."""
     npy_training_labels = numpy.asarray(onehot_training_labels)
@@ -89,7 +74,7 @@ def train_with_data(onehot_training_labels, onehot_test_labels, test_images, tra
               npy_training_labels,
               n_epoch=number_of_epochs,
               shuffle=False,
-              validation_set=(norm_test_images, npy_test_labels),
+              validation_set=.1,
               show_metric=True,
               run_id='mlp')
 

@@ -223,7 +223,7 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
             for row in range(top_y, bottom_y, tile_size / tile_overlap):
                 if row + tile_size < bottom_y and col + tile_size < right_x:
                     file_suffix = '{0:016d}'.format(tile_index)
-                    label_filepath = "{}{}.lbl".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, file_suffix)
+                    label_filepath = "{}{}{}.lbl".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, file_suffix)
                     new_tile = way_bitmap_npy[row:row + tile_size, col:col + tile_size]
                     with open(label_filepath, 'w') as outfile:
                         numpy.save(outfile, numpy.asarray((new_tile, col, row, raster_data_path)))
@@ -234,7 +234,7 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         for tile in tile_naip(raster_data_path, raster_dataset, bands_data, band_list, tile_size,
                               tile_overlap):
             file_suffix = '{0:016d}'.format(tile_index)
-            img_filepath = "{}{}.colors".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, file_suffix)
+            img_filepath = "{}{}{}.colors".format(CACHE_PATH, IMAGE_CACHE_DIRECTORY, file_suffix)
             with open(img_filepath, 'w') as outfile:
                 numpy.save(outfile, tile)
             tile_index += 1
@@ -262,11 +262,10 @@ def equalize_data(road_labels, naip_tiles, save_clippings):
     road_labels, naip_tiles = shuffle_in_unison(road_labels, naip_tiles)
     wayless_indices = []
     way_indices = []
-    for x in range(len(road_labels)):
-        tile = road_labels[x][0]
-        if has_ways_in_center(tile, 1):
+    for x in range(0, len(road_labels)):
+        if road_labels[x][0] == 0:
             way_indices.append(x)
-        elif not has_ways_in_center(tile, 16):
+        else:
             wayless_indices.append(x)
 
     count_wayless = len(wayless_indices)
@@ -351,46 +350,64 @@ def split_train_test(equal_count_tile_list, equal_count_way_list, percent_for_tr
     return test_labels, training_labels, test_images, training_images
 
 
-def format_as_onehot_arrays(labels):
+'''
+    for x in range(0, number_of_tiles):
+        label_path = random.choice(os.listdir(labels_path))
+        training_labels.append(numpy.load(labels_path + label_path))
+        file_suffix = parts[len(parts)-1]
+        img_path = "{}{}.colors".format(imgs_path, file_suffix)
+        training_images.append(numpy.load(img_path))
+'''
+
+
+def format_as_onehot_arrays(new_label_paths):
     """Return a list of one-hot array labels, for a list of tiles.
 
     Converts to a one-hot array of whether the tile has ways (i.e. [0,1] or [1,0] for each).
     """
+    training_images, onehot_training_labels = [], [] 
     print("CREATING ONE-HOT LABELS...")
     t0 = time.time()
     on_count = 0
     off_count = 0
-    onehot_labels = []
-    for label in labels:
-        if has_ways_in_center(label[0], 1):
-            onehot_labels.append([0, 1])
-            on_count += 1
-        elif not has_ways_in_center(label[0], 16):
-            onehot_labels.append([1, 0])
-            off_count += 1
+    for filename in new_label_paths:
 
-    print("ONE-HOT labels: {} on, {} off ({:.1%} on)".format(on_count, off_count, on_count / float(
+        full_path = "{}{}{}".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, filename)
+        label = numpy.load(full_path)
+
+        parts = full_path.split('.')[0].split('/') 
+        file_suffix = parts[len(parts)-1]
+        img_path = "{}{}{}.colors".format(CACHE_PATH, IMAGE_CACHE_DIRECTORY, file_suffix)
+
+        if has_ways_in_center(label[0], 1):
+            onehot_training_labels.append([0, 1])
+            on_count += 1
+            training_images.append(numpy.load(img_path))
+        elif not has_ways_in_center(label[0], 16):
+            onehot_training_labels.append([1, 0])
+            off_count += 1
+            training_images.append(numpy.load(img_path))
+
+    try:
+        print("ONE-HOT labels: {} on, {} off ({:.1%} on)".format(on_count, off_count, on_count / float(
         len(labels))))
+    except:
+        print("No on labels in this list of labels.") 
     print("one-hotting took {0:.1f}s".format(time.time() - t0))
-    return onehot_labels
+    return training_images, onehot_training_labels
 
 
 def load_training_tiles(number_of_tiles):
-    """Return number_of_tiles worth of training_labels and training_images."""
+    """Return number_of_tiles worth of training_label_paths."""
     print("LOADING DATA: reading from disk and unpickling")
     t0 = time.time()
-    training_labels, training_images = [], []
-    for x in range(0,number_of_tiles):
-        labels_path = "{}{}".format(CACHE_PATH, LABEL_CACHE_DIRECTORY)
+    training_label_paths = []
+    labels_path = "{}{}".format(CACHE_PATH, LABEL_CACHE_DIRECTORY)
+    for x in range(0, number_of_tiles):
         label_path = random.choice(os.listdir(labels_path))
-        training_labels.append(label_path)
-        parts = label_path.split('.')[0].split('/') 
-        file_suffix = parts[len(parts)-1]
-        img_path = "{}{}{}.colors".format(CACHE_PATH, IMAGE_CACHE_DIRECTORY, file_suffix)
-        training_images.append(img_path)
-        print(img_path)
+        training_label_paths.append(label_path)
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
-    return training_labels, training_images
+    return training_label_paths
 
 
 def cache_paths(raster_data_paths):
