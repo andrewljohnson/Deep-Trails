@@ -411,6 +411,26 @@ def load_training_tiles(number_of_tiles):
     return training_label_paths
 
 
+def load_all_training_tiles(naip_path):
+    """Return the image and label tiles for the naip_path."""
+    print("LOADING DATA: reading from disk and unpickling")
+    t0 = time.time()
+    path_parts = naip_path.split('/')
+    filename = path_parts[len(path_parts) - 1]
+    labels_path = CACHE_PATH + filename + '-labels.npy'
+    images_path = CACHE_PATH + filename + '-images.npy'
+    try:
+        with open(labels_path, 'r') as infile:
+            training_labels = numpy.load(infile)
+        with open(images_path, 'r') as infile:
+            training_images = numpy.load(infile)
+    except:
+        print("WARNING, skipping file because pickled data bad for {}".format(naip_path))
+        return [], []
+    print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
+    return training_labels, training_images
+
+
 def cache_paths(raster_data_paths):
     """Cache a list of naip image paths, to pass on to the train_neural_net script."""
     try:
