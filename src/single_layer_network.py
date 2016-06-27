@@ -1,44 +1,45 @@
 """A simple 1 layer network."""
+
 from __future__ import division, print_function, absolute_import
 
 import numpy
 import pickle
-import random
 import tflearn
 from tflearn.layers.conv import conv_2d, max_pool_2d
 
 from src.training_data import CACHE_PATH, load_training_tiles, equalize_data, \
-    split_train_test, format_as_onehot_arrays, shuffle_in_unison, has_ways_in_center
+    format_as_onehot_arrays, has_ways_in_center
 
 MODEL_METADATA_PATH = 'model_metadata.pickle'
 
 
 def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, number_of_epochs):
-    """Load tiled/cached data, which was prepared for the NAIPs listed in raster_data_paths.
-
-    Read in each NAIP's images/labels, add to train/test data, run some epochs as each is added.
-    Keep the train and test sets to a max of 10K images by throwing out random data sometimes.
-    """
+    """Load tiled/cached training data in batches, and train the neural net."""
     training_images = []
     onehot_training_labels = []
     model = None
-    NUMBER_OF_BATCHES = 100
-    BATCH_SIZE = 10000
 
-    for x in range (0, NUMBER_OF_BATCHES):
-        new_label_paths = load_training_tiles(BATCH_SIZE)
+    # the number of times to pull 10K images from disk, which produce about 200 training images
+    # because we want half on, half off
+    NUMBER_OF_BATCHES = 100
+
+    # there are usually 100+ images with road through the middle, out of every 10,000
+    EQUALIZATION_BATCH_SIZE = 10000
+
+    for x in range(0, NUMBER_OF_BATCHES):
+        new_label_paths = load_training_tiles(EQUALIZATION_BATCH_SIZE)
         print("Got batch of {} labels".format(len(new_label_paths)))
         new_training_images, new_onehot_training_labels = format_as_onehot_arrays(new_label_paths)
-        equal_count_way_list, equal_count_tile_list = equalize_data(new_onehot_training_labels, new_training_images, False)
+        equal_count_way_list, equal_count_tile_list = equalize_data(new_onehot_training_labels,
+                                                                    new_training_images, False)
         [training_images.append(i) for i in equal_count_tile_list]
         [onehot_training_labels.append(l) for l in equal_count_way_list]
-        
-        # once we have 100 test_images, maybe from more than one NAIP, train on a mini batch
+
+        # once we have 100 test_images, train on a mini batch
         if len(training_images) >= 100:
             # continue training the model with the new data set
-            model = train_with_data(onehot_training_labels, 
-                                    training_images, neural_net_type, bands, tile_size,
-                                    number_of_epochs, model)
+            model = train_with_data(onehot_training_labels, training_images, neural_net_type, bands,
+                                    tile_size, number_of_epochs, model)
             training_images = []
             onehot_training_labels = []
 
@@ -77,8 +78,12 @@ def train_with_data(onehot_training_labels, training_images,
 
 
 def model_for_type(neural_net_type, tile_size, on_band_count):
-    '''Type can be one_layer_relu or one_layer_relu_conv.'''
+    """The neural_net_type can be: one_layer_relu,
+                                   one_layer_relu_conv,
+                                   two_layer_relu_conv."""
     network = tflearn.input_data(shape=[None, tile_size, tile_size, on_band_count])
+
+    # NN architectures mirror ch. 3 of www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf
     if neural_net_type == 'one_layer_relu':
         network = tflearn.fully_connected(network, 64, activation='relu')
     elif neural_net_type == 'one_layer_relu_conv':
@@ -94,7 +99,7 @@ def model_for_type(neural_net_type, tile_size, on_band_count):
     # classify as road or not road
     softmax = tflearn.fully_connected(network, 2, activation='softmax')
 
-    # based on parameters from www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf
+    # hyperparameters based on www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf
     momentum = tflearn.optimizers.Momentum(
         learning_rate=.005, momentum=0.9,
         lr_decay=0.0002, name='Momentum')
@@ -116,7 +121,7 @@ def save_model(model, neural_net_type, bands, tile_size):
 
 
 def load_model(neural_net_type, tile_size, on_band_count):
-    '''Load the TensorFlow model serialized at path.'''
+    """Load the TensorFlow model serialized at path."""
     model = model_for_type(neural_net_type, tile_size, on_band_count)
     model.load(CACHE_PATH + 'model.pickle')
     return model

@@ -199,14 +199,10 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
     waymap = download_and_extract(label_data_files, extract_type)
 
     tile_index = 0
-        
+
     for raster_data_path in raster_data_paths:
 
-        path_parts = raster_data_path.split('/')
-        filename = path_parts[len(path_parts) - 1]
-
         # TODO need new code to check cache
-    
         raster_dataset, bands_data = read_naip(raster_data_path, band_list)
         rows = bands_data.shape[0]
         cols = bands_data.shape[1]
@@ -223,7 +219,8 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
             for row in range(top_y, bottom_y, tile_size / tile_overlap):
                 if row + tile_size < bottom_y and col + tile_size < right_x:
                     file_suffix = '{0:016d}'.format(tile_index)
-                    label_filepath = "{}{}{}.lbl".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, file_suffix)
+                    label_filepath = "{}{}{}.lbl".format(CACHE_PATH, LABEL_CACHE_DIRECTORY,
+                                                         file_suffix)
                     new_tile = way_bitmap_npy[row:row + tile_size, col:col + tile_size]
                     with open(label_filepath, 'w') as outfile:
                         numpy.save(outfile, numpy.asarray((new_tile, col, row, raster_data_path)))
@@ -245,21 +242,8 @@ def create_tiled_training_data(raster_data_paths, extract_type, band_list, tile_
         pickle.dump(training_info, outfile)
 
 
-def shuffle_in_unison(a, b):
-    """See www.stackoverflow.com/questions/11765061/better-way-to-shuffle-two-related-lists."""
-    a_shuf = []
-    b_shuf = []
-    index_shuf = range(len(a))
-    random.shuffle(index_shuf)
-    for i in index_shuf:
-        a_shuf.append(a[i])
-        b_shuf.append(b[i])
-    return a_shuf, b_shuf
-
-
 def equalize_data(road_labels, naip_tiles, save_clippings):
     """Make sure labeled data includes an equal set of ON and OFF tiles."""
-    road_labels, naip_tiles = shuffle_in_unison(road_labels, naip_tiles)
     wayless_indices = []
     way_indices = []
     for x in range(0, len(road_labels)):
@@ -365,7 +349,7 @@ def format_as_onehot_arrays(new_label_paths):
 
     Converts to a one-hot array of whether the tile has ways (i.e. [0,1] or [1,0] for each).
     """
-    training_images, onehot_training_labels = [], [] 
+    training_images, onehot_training_labels = [], []
     print("CREATING ONE-HOT LABELS...")
     t0 = time.time()
     on_count = 0
@@ -375,7 +359,7 @@ def format_as_onehot_arrays(new_label_paths):
         full_path = "{}{}{}".format(CACHE_PATH, LABEL_CACHE_DIRECTORY, filename)
         label = numpy.load(full_path)
 
-        parts = full_path.split('.')[0].split('/') 
+        parts = full_path.split('.')[0].split('/')
         file_suffix = parts[len(parts)-1]
         img_path = "{}{}{}.colors".format(CACHE_PATH, IMAGE_CACHE_DIRECTORY, file_suffix)
 
@@ -388,11 +372,6 @@ def format_as_onehot_arrays(new_label_paths):
             off_count += 1
             training_images.append(numpy.load(img_path))
 
-    try:
-        print("ONE-HOT labels: {} on, {} off ({:.1%} on)".format(on_count, off_count, on_count / float(
-        len(labels))))
-    except:
-        print("No on labels in this list of labels.") 
     print("one-hotting took {0:.1f}s".format(time.time() - t0))
     return training_images, onehot_training_labels
 
