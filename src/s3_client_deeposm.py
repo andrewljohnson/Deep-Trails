@@ -30,7 +30,8 @@ def post_findings_to_s3(raster_data_paths, model, training_info, render_results)
 
         # combine findings for all NAIP images analyzedfor the region
         [findings.append(f) for f in tag_with_locations(fp_images, false_positives,
-                                                        training_info['tile_size'], training_info['naip_state'])]
+                                                        training_info['tile_size'],
+                                                        training_info['naip_state'])]
 
     # dump combined findings to disk as a pickle
     try:

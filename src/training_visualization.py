@@ -10,6 +10,7 @@ from PIL import Image
 from src.training_data import load_training_tiles, way_bitmap_for_naip
 from src.single_layer_network import list_findings
 
+
 def render_errors(raster_data_paths, model, training_info, render_results):
     """Render JPEGs showing findings."""
     for path in raster_data_paths:
