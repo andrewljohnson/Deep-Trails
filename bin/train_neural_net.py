@@ -38,9 +38,8 @@ def main():
     with open(CACHE_PATH + METADATA_PATH, 'r') as infile:
         training_info = pickle.load(infile)
 
-    test_images, model = train_on_cached_data(raster_data_paths, args.neural_net,
-                                              training_info['bands'], training_info['tile_size'],
-                                              args.number_of_epochs)
+    model = train_on_cached_data(raster_data_paths, args.neural_net, training_info['bands'], 
+                                 training_info['tile_size'], args.number_of_epochs)
 
     
     save_model(model, args.neural_net, training_info['bands'], training_info['tile_size'])

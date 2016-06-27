@@ -44,7 +44,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
 
     save_model(model, neural_net_type, bands, tile_size)
 
-    return test_images, model
+    return model
 
 
 def train_with_data(onehot_training_labels, training_images,
