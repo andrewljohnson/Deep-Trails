@@ -21,7 +21,7 @@ STATE_NAMES_TO_ABBREVS = {
 
 def home(request):
     """The home page for deeposm.org."""
-    cache_findings()
+    # cache_findings()
     all_errors = models.MapError.objects.all()
     ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.items())
     state_map = {}
@@ -98,7 +98,7 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
                            "active": True,
                            "difficulty": 2
                            }
-                create_challenge_url = 'http://maproulette.org:8080/api/v2/challenge'
+                create_challenge_url = 'http://maproulette.org:8080/apidate_ti/v2/challenge'
                 response = requests.post(create_challenge_url, json=project,
                                          headers={'apiKey': key})
                 challenge_id = response.json()['id']
@@ -229,7 +229,7 @@ def cache_findings():
                 fixed_errors = models.MapError.objects.filter(
                     id__in=naip_errors[key])
                 for f in fixed_errors:
-                    f.solved_date = datetime.date.utcnow()
+                    f.solved_date = datetime.datetime.utcnow()
                     f.save()
 
             print("DOWNLOADED {}".format(obj.key))
