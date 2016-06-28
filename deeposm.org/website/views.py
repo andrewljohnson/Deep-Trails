@@ -19,9 +19,14 @@ STATE_NAMES_TO_ABBREVS = {
 }
 
 
+def refresh_findings(request):
+    """Call this view to update findigs from S3."""
+    cache_findings()
+    return home(request)
+
+
 def home(request):
     """The home page for deeposm.org."""
-    # cache_findings()
     all_errors = models.MapError.objects.all()
     ABRREVS_TO_NAMES = dict((v, k) for k, v in STATE_NAMES_TO_ABBREVS.items())
     state_map = {}
