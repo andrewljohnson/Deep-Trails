@@ -54,24 +54,6 @@ def home(request):
     return HttpResponse(template.render({'states': states, 'any_solved': any_solved}, request))
 
 
-# http://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
-def pretty_print_POST(req):
-    """
-    At this point it is completely built and ready
-    to be fired; it is "prepared".
-
-    However pay attention at the formatting used in
-    this function because it is programmed to be pretty
-    printed and may differ from the actual request.
-    """
-    print('{}\n{}\n{}\n\n{}'.format(
-        '-----------START-----------',
-        req.method + ' ' + req.url,
-        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
-        req.body,
-    ))
-
-
 def view_error(request, analysis_type, country_abbrev, state_name, error_id):
     """View the error with the given error_id."""
     error = models.MapError.objects.get(id=error_id)
