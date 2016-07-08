@@ -195,9 +195,13 @@ def cache_findings():
         except:
             pass
         if True or not os.path.exists(local_path):
-            s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-            s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
+            try:
+                s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+                s3_client.download_file(FINDINGS_S3_BUCKET, obj.key, local_path)
+            except:
+                # catch 'Not a directory: 'website/static/ia/.AbB78a64' -> 'website/static/ia/'
+                continue
             with open(local_path, 'rb') as infile:
                 errors = pickle.load(infile)
 
