@@ -397,9 +397,8 @@ def load_all_training_tiles(naip_path, bands):
     tile_size = 64
     tile_overlap = 1
     raster_dataset, bands_data = read_naip(naip_path, bands)
-    training_images = tile_naip(naip_path, raster_dataset, bands_data, bands, tile_size, tile_overlap)
-
-
+    training_images = tile_naip(naip_path, raster_dataset, bands_data, bands, tile_size, 
+                                tile_overlap)
     rows = bands_data.shape[0]
     cols = bands_data.shape[1]
     cache_filename = naip_path + '-ways.bitmap.npy'
