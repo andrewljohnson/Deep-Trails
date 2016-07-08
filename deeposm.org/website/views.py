@@ -6,7 +6,6 @@ import boto3
 import datetime
 import os
 import pickle
-import requests
 from website import models, settings
 
 
@@ -80,56 +79,6 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
         if request.GET.get('flag_error'):
             error.flagged_count += 1
             error.save()
-        elif request.GET.get('post_to_maproulette'):
-            key = "2-aEE4Mt5+0b/s2jevPT5CjdBAULJG1sAFZJQMLmh0G2L820gkiTm8RjIRgx3kv8fvBShD74wxgg=="
-            title = state_name.title() + ' Alignment Errors'
-            description = 'Fix misaligned ways in ' + state_name
-            help_prompt = 'Remove or shift ways that seem awful in the scene.'
-            list_challenges_url = 'http://maproulette.org:8080/api/v2/challenges'
-
-            response = requests.get(list_challenges_url, json={"project": 57, "name": title},
-                                    headers={'apiKey': key})
-            challenge_id = None
-            for c in response.json():
-                print(c['name'])
-                if c['name'] == title:
-                    challenge_id = c['id']
-
-            if not challenge_id:
-                project = {
-                           "project": 57,
-                           "name": title,
-                           "description": description,
-                           "help": help_prompt,
-                           "active": True,
-                           "difficulty": 2
-                           }
-                create_challenge_url = 'http://maproulette.org:8080/apidate_ti/v2/challenge'
-                response = requests.post(create_challenge_url, json=project,
-                                         headers={'apiKey': key})
-                challenge_id = response.json()['id']
-
-            error = models.MapError.objects.get(id=error_id)
-            lon, lat = (error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2
-            instructions = "DeepOSM detected a mis-registered road. Align the road."
-            task_info = {'challenge': challenge_id,
-                         'apiKey': key,
-                         'instruction': instructions,
-                         'geometries': {
-                                          'type': 'FeatureCollection',
-                                          'features': [{'type': "Feature",
-                                                        'geometry': {'type': 'Point',
-                                                                     'coordinates': [lon, lat]
-                                                                     }
-                                                        }]
-                                        }
-                         }
-            # slug = 'deeposm{}'.format(error_id)
-            create_task_url = 'http://maproulette.org:8080/api/v2/task'
-            response = requests.post(create_task_url, json=task_info,
-                                     headers={'apiKey': key})
-            pretty_print_POST(response.request)
-
     context = {
         'center': ((error.ne_lon + error.sw_lon) / 2, (error.ne_lat + error.sw_lat) / 2),
         'error': error,
