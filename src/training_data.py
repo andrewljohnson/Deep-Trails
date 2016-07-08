@@ -390,22 +390,31 @@ def load_training_tiles(number_of_tiles):
     return training_label_paths
 
 
-def load_all_training_tiles(naip_path):
+def load_all_training_tiles(naip_path, bands):
     """Return the image and label tiles for the naip_path."""
     print("LOADING DATA: reading from disk and unpickling")
     t0 = time.time()
-    path_parts = naip_path.split('/')
-    filename = path_parts[len(path_parts) - 1]
-    labels_path = CACHE_PATH + filename + '-labels.npy'
-    images_path = CACHE_PATH + filename + '-images.npy'
-    try:
-        with open(labels_path, 'r') as infile:
-            training_labels = numpy.load(infile)
-        with open(images_path, 'r') as infile:
-            training_images = numpy.load(infile)
-    except:
-        print("WARNING, skipping file because pickled data bad for {}".format(naip_path))
-        return [], []
+    tile_size = 64
+    tile_overlap = 1
+    raster_dataset, bands_data = read_naip(naip_path, bands)
+    training_images = tile_naip(naip_path, raster_dataset, bands_data, bands, tile_size, tile_overlap)
+
+
+    rows = bands_data.shape[0]
+    cols = bands_data.shape[1]
+    cache_filename = naip_path + '-ways.bitmap.npy'
+    way_bitmap_npy = numpy.load(cache_filename)
+
+    left_x, right_x = NAIP_PIXEL_BUFFER, cols - NAIP_PIXEL_BUFFER
+    top_y, bottom_y = NAIP_PIXEL_BUFFER, rows - NAIP_PIXEL_BUFFER
+
+    training_labels = []
+    for col in range(left_x, right_x, tile_size / tile_overlap):
+        for row in range(top_y, bottom_y, tile_size / tile_overlap):
+            if row + tile_size < bottom_y and col + tile_size < right_x:
+                new_tile = way_bitmap_npy[row:row + tile_size, col:col + tile_size]
+                training_labels.append(numpy.asarray((new_tile, col, row, naip_path)))
+
     print("DATA LOADED: time to deserialize test data {0:.1f}s".format(time.time() - t0))
     return training_labels, training_images
 

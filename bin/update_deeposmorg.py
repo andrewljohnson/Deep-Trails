@@ -11,6 +11,8 @@ from src.training_data import CACHE_PATH, METADATA_PATH, create_tiled_training_d
 def main():
     """Do each state one by one."""
     # randomize_naips = False
+    print("HI")
+    return
     naip_year = 2013
     naip_states = {'de': ['http://download.geofabrik.de/north-america/us/delaware-latest.osm.pbf'],
                    'me': ['http://download.geofabrik.de/north-america/us/maine-latest.osm.pbf']}
