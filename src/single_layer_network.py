@@ -21,7 +21,7 @@ def train_on_cached_data(raster_data_paths, neural_net_type, bands, tile_size, n
 
     # the number of times to pull 10K images from disk, which produce about 200 training images
     # because we want half on, half off
-    NUMBER_OF_BATCHES = 1
+    NUMBER_OF_BATCHES = 100
 
     # there are usually 100+ images with road through the middle, out of every 10,000
     EQUALIZATION_BATCH_SIZE = 10000

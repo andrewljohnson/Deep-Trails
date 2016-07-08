@@ -94,7 +94,6 @@ def view_error(request, analysis_type, country_abbrev, state_name, error_id):
 
 def list_errors(request, analysis_type, country_abbrev, state_name):
     """List all the errors of a given type in the country/state."""
-    # cache_findings()
     template = loader.get_template('list_errors.html')
     analysis_title = analysis_type.replace('-', ' ').title()
     if request.GET.get('flagged'):
