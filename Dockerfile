@@ -63,3 +63,5 @@ RUN apt-get install libhdf5-dev
 
 ADD . /DeepOSM
 WORKDIR /DeepOSM
+
+CMD /bin/bash
