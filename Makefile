@@ -18,7 +18,7 @@ Dockerfile.cpu: Dockerfile.base
 build-cpu: Dockerfile.cpu
 	docker build -f $< -t $(IMAGE_NAME) .
 
-build: build_cpu
+build: build-cpu
 
 dev-cpu: build-cpu
 	./docker_run_cpu.sh
