@@ -12,17 +12,24 @@ help:
 
 IMAGE_NAME = deeposm
 
-build: 
-	docker build -t $(IMAGE_NAME) .
+Dockerfile.cpu: Dockerfile.base
+	cp $< $@ 
 
-dev: build
+build-cpu: Dockerfile.cpu
+	docker build -f $< -t $(IMAGE_NAME) .
+
+build: build_cpu
+
+dev-cpu: build-cpu
 	./docker_run_cpu.sh
+
+dev: dev-cpu
 
 dev-gpu: 
 	docker build -f Dockerfile.devel-gpu -t $(IMAGE_NAME) .
 	./docker_run_gpu.sh false
 
-test: build
+test: build-cpu
 	./docker_run_cpu.sh python -m unittest discover
 
 update-deeposmorg: 
