@@ -37,8 +37,7 @@ dev-gpu: build-gpu
 test: build-cpu
 	./docker_run_cpu.sh python -m unittest discover
 
-update-deeposmorg: 
-	docker build -f Dockerfile.devel-gpu -t $(IMAGE_NAME) .
+update-deeposmorg: build-gpu
 	./docker_run_gpu.sh true
 
 notebook: build
