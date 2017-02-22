@@ -32,6 +32,18 @@ class TestImports(unittest.TestCase):
         import tflearn
         print tflearn
 
+    def test_import_osgeo(self):
+        import osgeo
+        print osgeo
+
+    def test_import_PIL(self):
+        import PIL
+        print PIL
+
+    def test_import_pyproj(self):
+        import pyproj
+        print pyproj
+
 
 if __name__ == "__main__":
     unittest.main()
