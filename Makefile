@@ -18,6 +18,12 @@ Dockerfile.cpu: Dockerfile.base
 build-cpu: Dockerfile.cpu
 	docker build -f $< -t $(IMAGE_NAME) .
 
+Dockerfile.gpu: Dockerfile.base
+	sed 's|^FROM tensorflow/tensorflow:latest|FROM tensorflow/tensorflow:latest-gpu|' $< > $@
+
+build-gpu: Dockerfile.gpu
+	docker build -f $< -t $(IMAGE_NAME)-gpu .
+
 build: build-cpu
 
 dev-cpu: build-cpu
@@ -25,8 +31,7 @@ dev-cpu: build-cpu
 
 dev: dev-cpu
 
-dev-gpu: 
-	docker build -f Dockerfile.devel-gpu -t $(IMAGE_NAME) .
+dev-gpu: build-gpu
 	./docker_run_gpu.sh false
 
 test: build-cpu
