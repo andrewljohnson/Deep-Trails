@@ -16,13 +16,13 @@ Dockerfile.cpu: Dockerfile.base
 	cp $< $@ 
 
 build-cpu: Dockerfile.cpu
-	docker build -f $< -t $(IMAGE_NAME) .
+	docker build -f $< -t $(IMAGE_NAME):latest .
 
 Dockerfile.gpu: Dockerfile.base
 	sed 's|^FROM tensorflow/tensorflow:latest|FROM tensorflow/tensorflow:latest-gpu|' $< > $@
 
 build-gpu: Dockerfile.gpu
-	docker build -f $< -t $(IMAGE_NAME)-gpu .
+	docker build -f $< -t $(IMAGE_NAME):latest-gpu .
 
 build: build-cpu
 
@@ -32,13 +32,13 @@ dev-cpu: build-cpu
 dev: dev-cpu
 
 dev-gpu: build-gpu
-	./docker_run_gpu.sh false
+	./docker_run_gpu.sh
 
 test: build-cpu
 	./docker_run_cpu.sh python -m unittest discover
 
 update-deeposmorg: build-gpu
-	./docker_run_gpu.sh true
+	./docker_run_gpu.sh python bin/update_deeposm.org
 
 notebook: build
 	docker run -p 8888:8888 \
