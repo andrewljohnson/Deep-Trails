@@ -8,4 +8,7 @@ requests==2.10.0
 s3cmd==1.6.1
 packaging==16.8
 Shapely==1.5.15
-tflearn==0.3
+
+# tflearn, pinned to an arbitrary commit
+git+https://github.com/tflearn/tflearn.git@4fef666
+

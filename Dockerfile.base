@@ -1,18 +1,19 @@
-FROM tensorflow/tensorflow:latest
+FROM tensorflow/tensorflow:0.8.0
 
 WORKDIR /DeepOSM
+
+# install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    	    libjpeg-dev \
+	    software-properties-common \
+    	    git cmake build-essential wget \
+	    libboost-all-dev libbz2-dev
 
 # install python-gdal
 RUN add-apt-repository ppa:ubuntugis/ppa && \
     apt-get update && \
     apt-get install -y python-gdal
-
-# install other required packages
-RUN apt-get update && \
-    apt-get install -y \
-    	    libjpeg-dev \
-    	    git cmake build-essential wget \
-	    libboost-all-dev libbz2-dev
 
 # install libosmium and pyosmium bindings
 RUN git clone https://github.com/osmcode/libosmium.git /libosmium && \
