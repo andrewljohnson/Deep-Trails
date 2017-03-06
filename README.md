@@ -101,6 +101,13 @@ python bin/train_neural_net.py
 
 For output, DeepOSM will produce some console logs, and then JPEGs of the ways, labels, and predictions overlaid on the tiff.
 
+### Testing
+
+There is a very limited test suite available at the moment, that can be accessed (from the host system) by running:
+
+```make test
+```
+
 ### Jupyter Notebook
 
 Alternately, development/research can be done via jupyter notebooks:
