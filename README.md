@@ -60,6 +60,20 @@ I also needed to set my VirtualBox default memory to 4GB, when running on a Mac.
  * stop Docker
  * open VirtualBox, and increase the memory of the VM Docker made
 
+### (GPU Only) Install nvidia-docker
+
+For Linux installations of DeepOSM, nvidia-docker can be downloaded
+and installed using the instructions available at
+[NVIDIA's github page](https://github.com/NVIDIA/nvidia-docker/wiki/Installation).
+As mentioned on that page, you will need appropriate NVIDIA drivers
+installed alongside `nvidia-modprobe`, which may already be available
+with your distribution, or can be downloaded from
+[NVIDIA's drivers page](http://www.nvidia.com/object/unix.html).
+
+Unfortunately, `nvidia-docker` is not presently available on Mac OSX
+due to limitations of the hypervisor that runs Docker (see
+[OSX Support #101](https://github.com/NVIDIA/nvidia-docker/issues/101)).
+
 ### Run Scripts
 
 Start Docker, then run:
