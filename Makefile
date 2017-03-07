@@ -29,10 +29,10 @@ build: build-cpu
 dev-cpu: build-cpu
 	./docker_run.sh cpu
 
-dev: dev-cpu
-
 dev-gpu: build-gpu
 	./docker_run.sh gpu
+
+dev: dev-cpu
 
 test: build-cpu
 	./docker_run.sh cpu python -m unittest discover
