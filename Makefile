@@ -40,9 +40,10 @@ test: build-cpu
 update-deeposmorg: build-gpu
 	./docker_run.sh gpu python bin/update_deeposm.org
 
-notebook: build
-	docker run -p 8888:8888 \
-               -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
-               -e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
-               -v `pwd`:/DeepOSM \
-               -it $(IMAGE_NAME) /run_jupyter.sh
+notebook-cpu: build-cpu
+	./docker_run.sh cpu ./run_jupyter.sh
+
+notebook-gpu: build-gpu
+	./docker_run.sh gpu ./run_jupyter.sh
+
+notebook: notebook-cpu

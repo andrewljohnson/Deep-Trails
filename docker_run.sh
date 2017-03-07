@@ -21,6 +21,7 @@ fi
 
 $DOCKER run \
     -v $(pwd):/DeepOSM \
+    -p 8888:8888 \
     -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     -it ${IMAGE_NAME} "$@"
