@@ -27,18 +27,18 @@ build-gpu: Dockerfile.gpu
 build: build-cpu
 
 dev-cpu: build-cpu
-	./docker_run_cpu.sh
+	./docker_run.sh cpu
 
 dev: dev-cpu
 
 dev-gpu: build-gpu
-	./docker_run_gpu.sh
+	./docker_run.sh gpu
 
 test: build-cpu
-	./docker_run_cpu.sh python -m unittest discover
+	./docker_run.sh cpu python -m unittest discover
 
 update-deeposmorg: build-gpu
-	./docker_run_gpu.sh python bin/update_deeposm.org
+	./docker_run.sh gpu python bin/update_deeposm.org
 
 notebook: build
 	docker run -p 8888:8888 \
