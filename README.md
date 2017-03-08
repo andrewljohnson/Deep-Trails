@@ -62,17 +62,125 @@ I also needed to set my VirtualBox default memory to 4GB, when running on a Mac.
 
 ### (GPU Only) Install nvidia-docker
 
-For Linux installations of DeepOSM, nvidia-docker can be downloaded
-and installed using the instructions available at
-[NVIDIA's github page](https://github.com/NVIDIA/nvidia-docker/wiki/Installation).
-As mentioned on that page, you will need appropriate NVIDIA drivers
-installed alongside `nvidia-modprobe`, which may already be available
-with your distribution, or can be downloaded from
-[NVIDIA's drivers page](http://www.nvidia.com/object/unix.html).
+In order to use your GPU to accelerate DeepOSM, you will need to
+download and install the latest NVIDIA drivers for your GPU, then
+install `nvidia-docker`.
 
-Unfortunately, `nvidia-docker` is not presently available on Mac OSX
-due to limitations of the hypervisor that runs Docker (see
-[OSX Support #101](https://github.com/NVIDIA/nvidia-docker/issues/101)).
+First, find the latest NVIDIA drivers for your GPU on
+[NVIDIA's website](http://www.nvidia.com/Download/Find.aspx). Once you
+have downloaded the appropriate `NVIDIA-*.run` file, install it as
+follows (based on
+[these instructions](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/accelerated-computing-instances.html#install-nvidia-driver)):
+
+1. Ensure your system is up-to-date and reboot to ensure the latest
+   installed kernel is loaded:
+
+```
+# ensure your packages are up-to-date
+sudo apt-get update
+sudo apt-get dist-upgrade
+# and reboot
+sudo reboot
+```
+
+2. Once your system has rebooted, install `build-essential` and the
+   `linux-headers` package for your current kernel version (or
+   equivalents for your linux distribution):
+
+```
+sudo apt-get install build-essential linux-headers-$(uname -r) 
+```
+
+3. Then run the NVIDIA driver install you downloaded earlier, and
+   reboot your machine afterwards:
+
+```
+sudo bash <location of ./NVIDIA-Linux-*.run file>
+sudo reboot
+```
+
+4. Finally, verify that the nvidia drivers are installed correctly,
+   and your GPU can be located using `nvidia-smi`:
+
+```
+$ nvidia-smi
+Wed Mar  8 10:25:10 2017       
++------------------------------------------------------+                       
+| NVIDIA-SMI 340.102    Driver Version: 340.102        |                       
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GRID K520           Off  | 0000:00:03.0     Off |                  N/A |
+| N/A   52C    P0    36W / 125W |     10MiB /  4095MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Compute processes:                                               GPU Memory |
+|  GPU       PID  Process name                                     Usage      |
+|=============================================================================|
+|  No running compute processes found                                         |
++-----------------------------------------------------------------------------+
+```
+
+5. Now that the NVIDIA drivers are installed, `nvidia-docker` can be
+downloaded and installed as follows (based on
+[these instructions](https://github.com/NVIDIA/nvidia-docker#quick-start)):
+
+```
+wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
+sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
+```
+
+6. And you can confirm the installation, by attempting to run
+`nvida-smi` inside of a docker container:
+
+```
+$ sudo nvidia-docker run --rm nvidia/cuda nvidia-smi
+latest: Pulling from nvidia/cuda
+16da43b30d89: Pull complete 
+1840843dafed: Pull complete 
+91246eb75b7d: Pull complete 
+7faa681b41d7: Pull complete 
+97b84c64d426: Pull complete 
+ce2347c6d450: Pull complete 
+2043449d7c98: Pull complete 
+ddedeea83b15: Pull complete 
+a2274391a3d7: Pull complete 
+290b86568b33: Pull complete 
+4352c6db114b: Pull complete 
+Digest: sha256:d5d5c717f97300022cfb6330511d57c483518d6c55ec9455924efbf6b501f015
+Status: Downloaded newer image for nvidia/cuda:6.5
+Wed Mar  8 10:43:46 2017       
++------------------------------------------------------+                       
+| NVIDIA-SMI 340.102    Driver Version: 340.102        |                       
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GRID K520           Off  | 0000:00:03.0     Off |                  N/A |
+| N/A   50C    P8    18W / 125W |     11MiB /  4095MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Compute processes:                                               GPU Memory |
+|  GPU       PID  Process name                                     Usage      |
+|=============================================================================|
+|  No running compute processes found                                         |
++-----------------------------------------------------------------------------+
+```
+
+If you get an error like `nvidia-docker | 2017/03/08 10:36:24 Error:
+unsupported CUDA version: driver 6.5 < image 8.0.61`, then choose a
+version of the `nvidia/cuda` docker image that matches your supported
+CUDA version (6.5 in this case):
+
+```
+sudo nvidia-docker run --rm nvidia/cuda:6.5 nvidia-smi
+```
+
+Once you have confirmed `nvidia-smi` works inside of `nvidia-docker`,
+you should be able to run DeepOSM using your GPU.
 
 ### Run Scripts
 
